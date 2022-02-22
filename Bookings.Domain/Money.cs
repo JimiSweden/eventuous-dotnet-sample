@@ -6,7 +6,7 @@ public record Money {
     public float  Amount   { get; internal init; }
     public string Currency { get; internal init; }
 
-    static readonly string[] SupportedCurrencies = {"USD", "GPB", "EUR"};
+    static readonly string[] SupportedCurrencies = {"USD", "GPB", "EUR", "SEK"};
 
     internal Money() { }
 
