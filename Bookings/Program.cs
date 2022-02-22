@@ -17,7 +17,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft.AspNetCore.Mvc.Infrastructure", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5341")
+    //.WriteTo.Seq("http://localhost:5341") //Serilog needs to be installed for this
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);

@@ -16,7 +16,8 @@ namespace Bookings.Payments;
 
 public static class Registrations {
     public static void AddServices(this IServiceCollection services) {
-        services.AddEventStoreClient("esdb://localhost:2113?tls=false");
+        //services.AddEventStoreClient("esdb://localhost:2113?tls=false");
+        services.AddEventStoreClient("esdb://admin:changeit@localhost:2113?tls=true&tlsVerifyCert=false");
         services.AddAggregateStore<EsdbEventStore>();
         services.AddApplicationService<CommandService, Payment>();
         services.AddSingleton(Mongo.ConfigureMongo());

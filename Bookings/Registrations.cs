@@ -27,11 +27,14 @@ public static class Registrations {
             )
         );
 
-        services.AddEventStoreClient("esdb://localhost:2113?tls=false");
+        // See 'README how to run etc.md' for ESDB notes        
+        //Note: if you have login (default) on the Event store database, you need the user and password.
+        services.AddEventStoreClient("esdb://admin:changeit@localhost:2113?tls=true&tlsVerifyCert=false");
+        //services.AddEventStoreClient("esdb://localhost:2113?tls=false");
         services.AddAggregateStore<EsdbEventStore>();
         services.AddApplicationService<BookingsCommandService, Booking>();
 
-        services.AddSingleton<Services.IsRoomAvailable>((id, period) => new ValueTask<bool>(true));
+        services.AddSingleton<Services.IsRoomAvailable>((id, period) => new ValueTask<bool>(true)); //a dummy implementation always returning true. 
 
         services.AddSingleton<Services.ConvertCurrency>((from, currency) => new Money(from.Amount * 2, currency));
 
