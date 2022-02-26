@@ -5,7 +5,7 @@ namespace Bookings.Domain.Bookings;
 
 public static class BookingEvents {
     public static class V1 {
-        [EventType("V1.RoomBooked")]
+        [EventType("V1.RoomBooked")] // https://eventuous.dev/docs/persistence/serialisation/#auto-registration-of-types
         public record RoomBooked(
             string         BookingId,
             string         GuestId,

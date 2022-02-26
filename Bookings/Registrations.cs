@@ -43,7 +43,8 @@ public static class Registrations {
 
         services.AddSingleton<Services.ConvertCurrency>((from, currency) => new Money(from.Amount * 2, currency));
 
-        services.AddSingleton(Mongo.ConfigureMongo());
+        services.AddSingleton(Mongo.ConfigureMongo()); //register IMongoDatbase
+
         services.AddCheckpointStore<MongoCheckpointStore>();
 
         services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
