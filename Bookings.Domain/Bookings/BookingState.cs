@@ -2,15 +2,19 @@ using System.Collections.Immutable;
 using Eventuous;
 using static Bookings.Domain.Bookings.BookingEvents;
 
-namespace Bookings.Domain.Bookings; 
+namespace Bookings.Domain.Bookings;
 
-public record BookingState : AggregateState<BookingState, BookingId> {
-    public string     GuestId     { get; init; }
-    public RoomId     RoomId      { get; init; }
-    public StayPeriod Period      { get; init; }
-    public Money      Price       { get; init; }
-    public Money      Outstanding { get; init; }
-    public bool       Paid        { get; init; }
+/// <summary>
+/// record, instead of class, ensures Imutability. it is always 'newed'
+/// </summary>
+public record BookingState : AggregateState<BookingState, BookingId>
+{
+    public string GuestId { get; init; }
+    public RoomId RoomId { get; init; }
+    public StayPeriod Period { get; init; }
+    public Money Price { get; init; }
+    public Money Outstanding { get; init; }
+    public bool Paid { get; init; }
 
     public ImmutableList<PaymentRecord> PaymentRecords { get; init; } = ImmutableList<PaymentRecord>.Empty;
 
@@ -23,6 +27,7 @@ public record BookingState : AggregateState<BookingState, BookingId> {
     }
 
     static BookingState HandlePayment(BookingState state, V1.PaymentRecorded e)
+        // 'record with' will "modify" the props set here, and use the current props as is from, in our case, our BookingState 'state' 
         => state with {
             Outstanding = new Money { Amount = e.Outstanding, Currency = e.Currency },
             PaymentRecords = state.PaymentRecords.Add(
@@ -36,7 +41,7 @@ public record BookingState : AggregateState<BookingState, BookingId> {
             RoomId = new RoomId(booked.RoomId),
             Period = new StayPeriod(booked.CheckInDate, booked.CheckOutDate),
             GuestId = booked.GuestId,
-            Price = new Money { Amount       = booked.BookingPrice, Currency      = booked.Currency },
+            Price = new Money { Amount = booked.BookingPrice, Currency = booked.Currency },
             Outstanding = new Money { Amount = booked.OutstandingAmount, Currency = booked.Currency }
         };
 }

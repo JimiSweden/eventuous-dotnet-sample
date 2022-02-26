@@ -17,7 +17,7 @@ public class BookingsCommandService : ApplicationService<Booking, BookingState, 
                 new Money(cmd.BookingPrice, cmd.Currency),
                 new Money(cmd.PrepaidAmount, cmd.Currency),
                 DateTimeOffset.Now,
-                isRoomAvailable
+                isRoomAvailable //NOTE: isRoomAvalable is the service delegate method, with implementation registered in Registrations
             )
         );
 

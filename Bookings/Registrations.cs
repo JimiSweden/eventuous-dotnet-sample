@@ -34,7 +34,12 @@ public static class Registrations {
         services.AddAggregateStore<EsdbEventStore>();
         services.AddApplicationService<BookingsCommandService, Booking>();
 
-        services.AddSingleton<Services.IsRoomAvailable>((id, period) => new ValueTask<bool>(true)); //a dummy implementation always returning true. 
+        /* Note: services.methods are delegates, used in the BookingsCommandService as injected.
+       * a standard method can't be injected (the whole service would be needed)
+       */
+        //services.AddSingleton<Services.IsRoomAvailable>((id, period) => new ValueTask<bool>(true)); //a dummy implementation always returning true. 
+        services.AddSingleton<Services.IsRoomAvailable>(RoomCheckerService.IsRoomAvailable); //with implementation
+
 
         services.AddSingleton<Services.ConvertCurrency>((from, currency) => new Money(from.Amount * 2, currency));
 

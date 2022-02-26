@@ -3,6 +3,11 @@ using NodaTime;
 
 namespace Bookings.Application.Queries;
 
+/// <summary>
+/// represents the document contract in MongoDb <br/>
+/// as you see the types are of basic ones
+/// 
+/// </summary>
 public record BookingDocument : ProjectedDocument {
     public BookingDocument(string id) : base(id) { }
 
