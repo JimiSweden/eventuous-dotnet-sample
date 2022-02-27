@@ -4,6 +4,9 @@ using static Bookings.Domain.Services;
 
 namespace Bookings.Domain.Bookings;
 
+/// <summary>
+/// note that the actions/methods here needs to be handled in <see cref="Bookings.Application.BookingsCommandService"/>
+/// </summary>
 public class Booking : Aggregate<BookingState, BookingId>
 {
     public async Task BookRoom(
@@ -37,37 +40,64 @@ public class Booking : Aggregate<BookingState, BookingId>
          *  
         */
 
-        var (stateBefore, stateAfterAppliedEvent) =
-            Apply(
-            new V1.RoomBooked(
-                bookingId,
-                guestId,
-                roomId,
-                period.CheckIn,
-                period.CheckOut,
-                price.Amount,
-                prepaid.Amount,
-                outstanding.Amount,
-                price.Currency,
-                bookedAt
+        Apply(new V1.RoomBooked(
+            bookingId,
+            guestId,
+            roomId,
+            period.CheckIn,
+            period.CheckOut,
+            price.Amount,
+            prepaid.Amount,
+            outstanding.Amount,
+            price.Currency,
+            bookedAt
             )
         );
-
-        Console.WriteLine("stateBefore", stateBefore.ToString());
-        Console.WriteLine("stateAfterAppliedEvent", stateAfterAppliedEvent.ToString());
-
-
 
 
         MarkFullyPaidIfNecessary(bookedAt);
     }
 
-    public void RecordPayment(
-        Money paid,
-        string paymentId,
-        string paidBy,
-        DateTimeOffset paidAt
+
+    public async Task Change(
+        RoomId roomId,
+        StayPeriod period,
+        Money price,
+        Money prepaid,//needed for price change and calculating outstanding,
+                      // could be calculated from State.outstanding and State.price before (or adding a prepaidAmount prop)
+        DateTimeOffset bookedAt,
+        IsRoomAvailable isRoomAvailable
     )
+    {
+        EnsureExists();
+
+        //throws DomainException if room is not available
+        await EnsureRoomAvailable(roomId, period, isRoomAvailable);
+
+        //Note: since price and prepaid are records, the '-' operator is a method in Money,
+        // containing business logic, i.e. validaion: (you can't subtract on different currencies)
+        var outstanding = price - prepaid;
+
+        Apply(new V1.BookingChanged(
+               State.Id, //bookingId,
+               roomId,
+               period.CheckIn,
+               period.CheckOut,
+               price.Amount,
+               prepaid.Amount,
+               outstanding.Amount,
+               price.Currency, //currency and price are bound, they are "Money"
+               bookedAt
+               )
+           );
+    }
+
+    public void RecordPayment(
+    Money paid,
+    string paymentId,
+    string paidBy,
+    DateTimeOffset paidAt
+)
     {
         EnsureExists();
 

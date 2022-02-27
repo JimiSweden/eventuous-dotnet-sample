@@ -19,6 +19,21 @@ public static class BookingEvents {
             DateTimeOffset BookingDate
         );
 
+        //todo? RoomChanged + StayPeriod changed ? 
+        [EventType("V1.BookingChanged")]
+        public record BookingChanged(
+            string BookingId,            
+            string RoomId,
+            LocalDate CheckInDate,
+            LocalDate CheckOutDate,
+            float BookingPrice,
+            float PrepaidAmount,
+            float OutstandingAmount,
+            string Currency, //currency and price are bound, they are "Money"
+            DateTimeOffset BookingDate
+        );
+
+
         [EventType("V1.PaymentRecorded")]
         public record PaymentRecorded(
             string         BookingId,

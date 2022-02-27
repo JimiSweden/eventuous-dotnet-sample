@@ -32,6 +32,11 @@ public static class Registrations {
         services.AddEventStoreClient("esdb://admin:changeit@localhost:2113?tls=true&tlsVerifyCert=false");
         //services.AddEventStoreClient("esdb://localhost:2113?tls=false");
         services.AddAggregateStore<EsdbEventStore>();
+
+
+        /* register the command handlers for the Booking Aggregate
+         * this is an Eventuous extension.
+         */
         services.AddApplicationService<BookingsCommandService, Booking>();
 
         /* Note: services.methods are delegates, used in the BookingsCommandService as injected.
@@ -52,6 +57,7 @@ public static class Registrations {
             builder => builder
                 .AddEventHandler<BookingStateProjection>()
                 .AddEventHandler<MyBookingsProjection>()
+                //TODO: add projection holding the available rooms and booked dates
                 .WithPartitioningByStream(2)
         );
 

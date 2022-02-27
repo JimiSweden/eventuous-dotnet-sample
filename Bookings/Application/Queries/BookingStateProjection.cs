@@ -6,9 +6,16 @@ using static Bookings.Domain.Bookings.BookingEvents;
 
 namespace Bookings.Application.Queries;
 
+/// <summary>
+/// This is used to update the pojection BookingDocument, in MongoDb, 
+/// it gets the data from the event-store
+/// 
+/// </summary>
 public class BookingStateProjection : MongoProjection<BookingDocument> {
     public BookingStateProjection(IMongoDatabase database) : base(database) {
         On<V1.RoomBooked>(evt => evt.BookingId, HandleRoomBooked);
+
+        On<V1.BookingChanged>(evt => evt.BookingId, HandleBookingChanged);
 
         On<V1.PaymentRecorded>(
             evt => evt.BookingId,
@@ -31,4 +38,15 @@ public class BookingStateProjection : MongoProjection<BookingDocument> {
             .Set(x => x.CheckOutDate, evt.CheckOutDate)
             .Set(x => x.BookingPrice, evt.BookingPrice)
             .Set(x => x.Outstanding, evt.OutstandingAmount);
+
+    static UpdateDefinition<BookingDocument> HandleBookingChanged(
+        V1.BookingChanged evt, UpdateDefinitionBuilder<BookingDocument> update
+    )
+        => update.Set(x => x.RoomId, evt.RoomId)
+            .Set(x => x.CheckInDate, evt.CheckInDate)
+            .Set(x => x.CheckOutDate, evt.CheckOutDate)
+            .Set(x => x.BookingPrice, evt.BookingPrice)
+            .Set(x => x.Outstanding, evt.OutstandingAmount);
+    
+
 }

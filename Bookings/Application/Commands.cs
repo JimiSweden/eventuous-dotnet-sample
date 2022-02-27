@@ -13,5 +13,16 @@ public static class BookingCommands {
         DateTimeOffset BookingDate
     );
 
+    public record ChangeBooking(
+        string BookingId,
+        string RoomId,
+        DateTime CheckInDate,
+        DateTime CheckOutDate,
+        float BookingPrice,
+        float PrepaidAmount,
+        string Currency, //currency and price are bound, they are "Money"
+        DateTimeOffset BookingDate
+    );
+
     public record RecordPayment(string BookingId, float PaidAmount, string Currency, string PaymentId, string PaidBy);
 }

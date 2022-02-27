@@ -39,7 +39,7 @@ public class QueryApi : ControllerBase {
     }
 
     /// <summary>
-    /// Get MyBookings projection from MongoDb for a single guest/user.
+    /// Get MyBookings-projection from MongoDb for a single guest/user.
     /// </summary>
     /// <param name="guestId"></param>
     /// <param name="cancellationToken"></param>
@@ -56,7 +56,11 @@ public class QueryApi : ControllerBase {
         var myBookingsForGuest = await _mongoDb.LoadDocument<MyBookings>(guestId, cancellationToken);
         return myBookingsForGuest;
     }
-
+    /// <summary>
+    /// Get all guests MyBookings-projection from collection in mongoDb
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet]
     public async Task<IEnumerable<MyBookings>> GetAllBookings(CancellationToken cancellationToken)
     {

@@ -21,4 +21,6 @@ public class MyBookingsProjection : MongoProjection<MyBookings> {
             )
         );
     }
+
+    //TODO: update MyBookings.Booking when a booking has changed. V1.BookingChanged
 }
