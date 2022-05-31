@@ -20,7 +20,7 @@ using OpenTelemetry.Trace;
 namespace Bookings;
 
 public static class Registrations {
-    public static void AddEventuous(this IServiceCollection services) {
+    public static void AddEventuous(this IServiceCollection services, IConfiguration configuration) {
         DefaultEventSerializer.SetDefaultSerializer(
             new DefaultEventSerializer(
                 new JsonSerializerOptions(JsonSerializerDefaults.Web).ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
@@ -28,8 +28,10 @@ public static class Registrations {
         );
 
         // See 'README how to run etc.md' for ESDB notes        
+        services.AddEventStoreClient(configuration["EventStore:ConnectionString"]);
         //Note: if you have login (default) on the Event store database, you need the user and password.
-        services.AddEventStoreClient("esdb://admin:changeit@localhost:2113?tls=true&tlsVerifyCert=false");
+//TODO.. efter merge, till config. 
+                //services.AddEventStoreClient("esdb://admin:changeit@localhost:2113?tls=true&tlsVerifyCert=false");
         //services.AddEventStoreClient("esdb://localhost:2113?tls=false");
         services.AddAggregateStore<EsdbEventStore>();
 
@@ -48,19 +50,20 @@ public static class Registrations {
 
         services.AddSingleton<Services.ConvertCurrency>((from, currency) => new Money(from.Amount * 2, currency));
 
-        services.AddSingleton(Mongo.ConfigureMongo()); //register IMongoDatbase
+        services.AddSingleton(Mongo.ConfigureMongo(configuration));
 
         services.AddCheckpointStore<MongoCheckpointStore>();
 
         services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
             "BookingsProjections",
             builder => builder
+                .Configure(cfg => cfg.ConcurrencyLimit = 2)
                 .AddEventHandler<BookingStateProjection>()
                 .AddEventHandler<MyBookingsProjection>()
                 //TODO: add projection holding the available rooms and booked dates
                 .WithPartitioningByStream(2)
         );
-
+        
         services.AddSubscription<StreamSubscription, StreamSubscriptionOptions>(
             "PaymentIntegration",
             builder => builder
@@ -70,23 +73,34 @@ public static class Registrations {
     }
 
     public static void AddOpenTelemetry(this IServiceCollection services) {
+        var otelEnabled = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") != null;
         services.AddOpenTelemetryMetrics(
-            builder => builder
-                .AddAspNetCoreInstrumentation()
-                .AddEventuous()
-                .AddEventuousSubscriptions()
-                .AddPrometheusExporter()
+            builder => {
+                builder
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("bookings"))
+                    .AddAspNetCoreInstrumentation()
+                    .AddEventuous()
+                    .AddEventuousSubscriptions()
+                    .AddPrometheusExporter();
+                if (otelEnabled) builder.AddOtlpExporter();
+            }
         );
 
         services.AddOpenTelemetryTracing(
-            builder => builder
-                .AddAspNetCoreInstrumentation()
-                .AddGrpcClientInstrumentation()
-                .AddEventuousTracing()
-                .AddMongoDBInstrumentation()
-                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("bookings"))
-                .SetSampler(new AlwaysOnSampler())
-                .AddZipkinExporter()
+            builder => {
+                builder
+                    .AddAspNetCoreInstrumentation()
+                    .AddGrpcClientInstrumentation()
+                    .AddEventuousTracing()
+                    .AddMongoDBInstrumentation()
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("bookings"))
+                    .SetSampler(new AlwaysOnSampler());
+
+                if (otelEnabled)
+                    builder.AddOtlpExporter();
+                else
+                    builder.AddZipkinExporter();
+            }
         );
     }
 }

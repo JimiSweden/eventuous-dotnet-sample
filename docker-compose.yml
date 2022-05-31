@@ -4,7 +4,8 @@ services:
 
   esdb:
     container_name: esdemo-esdb
-    image: eventstore/eventstore:latest #20.10.2-buster-slim
+    image: ghcr.io/eventstore/eventstore:21.10.0-alpha-arm64v8
+#    image: eventstore/eventstore:latest #20.10.2-buster-slim
     ports:
       - '2113:2113'
       - '1113:1113'
@@ -41,17 +42,18 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
-#  grafana:
-#    container_name: infozone-grafana
-#    image: grafana/grafana:6.7.2
-#    ports:
-#      - "3000:3000"
-#    volumes:
-#      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/prometheus.yaml
-#      - ./grafana/dashboards:/dashboards
+  grafana:
+    container_name: esdemo-grafana
+    image: grafana/grafana:6.7.2
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/prometheus.yaml
+      - ./grafana/dashboards:/dashboards
 
   seq:
     image: datalust/seq:latest
+    container_name: esdemo-seq
     environment:
       - ACCEPT_EULA=Y
     ports:

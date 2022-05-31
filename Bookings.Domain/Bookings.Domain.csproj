@@ -1,6 +1,7 @@
+<!--EXTERNAL_PROPERTIES: EventuousVersion-->
 <Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
-        <PackageReference Include="Eventuous" Version="0.8.4" />
-        <PackageReference Include="NodaTime" Version="3.1.0" />
+        <PackageReference Include="Eventuous" Version="$(EventuousVersion)" />
+        <PackageReference Include="NodaTime" Version="3.0.10" />
     </ItemGroup>
 </Project>

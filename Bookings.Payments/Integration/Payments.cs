@@ -1,27 +1,23 @@
 using Bookings.Payments.Domain;
-using EventStore.Client;
 using Eventuous;
-using Eventuous.EventStore.Producers;
-using Eventuous.EventStore.Subscriptions;
-using Eventuous.Shovel;
-using Eventuous.Subscriptions.Checkpoints;
-using Eventuous.Subscriptions.Consumers;
+using Eventuous.Gateway;
 using Eventuous.Subscriptions.Context;
+using static Bookings.Payments.Integration.IntegrationEvents;
 
 namespace Bookings.Payments.Integration;
 
-public static class PaymentsShovel {
+public static class PaymentsGateway {
     static readonly StreamName Stream = new("PaymentsIntegration");
     
-    public static ValueTask<ShovelContext?> Transform(IMessageConsumeContext original) {
+    public static ValueTask<GatewayMessage[]> Transform(IMessageConsumeContext original) {
         var result = original.Message is PaymentEvents.PaymentRecorded evt
-            ? new ShovelContext(
+            ? new GatewayMessage(
                 Stream,
-                new IntegrationEvents.BookingPaymentRecorded(evt.PaymentId, evt.BookingId, evt.Amount, evt.Currency),
+                new BookingPaymentRecorded(evt.PaymentId, evt.BookingId, evt.Amount, evt.Currency),
                 new Metadata()
             )
             : null;
-        return ValueTask.FromResult(result);
+        return ValueTask.FromResult(result != null ? new []{result} : Array.Empty<GatewayMessage>());
     }
 }
 

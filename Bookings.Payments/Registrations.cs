@@ -15,19 +15,18 @@ using OpenTelemetry.Trace;
 namespace Bookings.Payments; 
 
 public static class Registrations {
-    public static void AddServices(this IServiceCollection services) {
-        //services.AddEventStoreClient("esdb://localhost:2113?tls=false");
-        services.AddEventStoreClient("esdb://admin:changeit@localhost:2113?tls=true&tlsVerifyCert=false");
+    public static void AddServices(this IServiceCollection services, IConfiguration configuration) {
+        services.AddEventStoreClient(configuration["EventStore:ConnectionString"]);
         services.AddAggregateStore<EsdbEventStore>();
         services.AddApplicationService<CommandService, Payment>();
-        services.AddSingleton(Mongo.ConfigureMongo());
+        services.AddSingleton(Mongo.ConfigureMongo(configuration));
         services.AddCheckpointStore<MongoCheckpointStore>();
         services.AddEventProducer<EventStoreProducer>();
 
         services
-            .AddShovel<AllStreamSubscription, AllStreamSubscriptionOptions, EventStoreProducer>(
+            .AddGateway<AllStreamSubscription, AllStreamSubscriptionOptions, EventStoreProducer>(
                 "IntegrationSubscription",
-                PaymentsShovel.Transform
+                PaymentsGateway.Transform
             );
     }
     

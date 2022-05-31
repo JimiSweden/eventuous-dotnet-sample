@@ -34,7 +34,7 @@ public class QueryApi : ControllerBase {
     [Route("{id}")]
     public async Task<BookingState> GetBooking(string id, CancellationToken cancellationToken) {
         //This reads from the AggregateStore, that is the EventStoreDB in our case (default)
-        var booking = await _store.Load<Booking, BookingState, BookingId>(new BookingId(id), cancellationToken);
+        var booking = await _store.Load<Booking>(new BookingId(id), cancellationToken);
         return booking.State;
     }
 
