@@ -1,10 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookings", "Bookings\Bookings.csproj", "{7B4C2F9A-452E-4C08-86D5-F761C67089A6}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bookings", "Bookings\Bookings.csproj", "{7B4C2F9A-452E-4C08-86D5-F761C67089A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookings.Domain", "Bookings.Domain\Bookings.Domain.csproj", "{280363FF-F078-44B7-9A32-20FA7D6046E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bookings.Domain", "Bookings.Domain\Bookings.Domain.csproj", "{280363FF-F078-44B7-9A32-20FA7D6046E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookings.Payments", "Bookings.Payments\Bookings.Payments.csproj", "{EBD8B561-B354-4FDB-BF88-0BF0681F5530}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bookings.Payments", "Bookings.Payments\Bookings.Payments.csproj", "{EBD8B561-B354-4FDB-BF88-0BF0681F5530}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "README", "README", "{DE67D865-22CF-4C0A-A188-0D00811AF8C8}"
+	ProjectSection(SolutionItems) = preProject
+		README EventStore how to install run and getting started.md = README EventStore how to install run and getting started.md
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +34,10 @@ Global
 		{EBD8B561-B354-4FDB-BF88-0BF0681F5530}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBD8B561-B354-4FDB-BF88-0BF0681F5530}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CF598E8A-9752-4CC8-B128-8FB920E6FF33}
 	EndGlobalSection
 EndGlobal
