@@ -2,11 +2,8 @@
 see 'README EventStore how to install run and getting started.md'
 
 
-## prereq: 
-### mongodb. 
-it is used from Eventous to store the projections. 
-### EventStore
-for storing the events. The source data.
+## Troubleshooting -
+If you app doesnt start >> 
 
 ## Important note! if the project doesn't start
 - ensure the EventsoreClient connection string is corect, and ES is running.
@@ -25,6 +22,13 @@ C:\[...]\dotnet-sample\Bookings\Bookings.csproj AND C:\[...]\dotnet-sample\Booki
 ...	
 	
 ```
+
+## prereq: 
+### mongodb. 
+it is used from Eventous to store the projections. 
+### EventStore
+for storing the events. The source data.
+
 
 
 ## configs:
@@ -250,6 +254,7 @@ https://127.0.0.1:2113/web/index.html#/
 > chrome > settings > security > manage certificates > import. "C:\ESDB\certs\node1\node.crt"
 > And restart Chrome, somtimes it works... 
 
+> IF you allready imported it, and gets a certificate alert/popup with MS-tokens, just cancel the alert.
 
 ## in the StreamBrowser you can see the booking events . 
 https://127.0.0.1:2113/web/index.html#/streams
