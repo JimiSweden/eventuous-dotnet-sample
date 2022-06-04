@@ -54,6 +54,10 @@ public static class Registrations {
 
         services.AddCheckpointStore<MongoCheckpointStore>();
 
+        /* subscriptions below are "listening" to  EventStoreDB $all global stream
+         * and updates the MongoDb projection views (read models) 
+         */
+        //AllStreamSubscription is a Catch-up subscription for EventStoreDB, using the $all global stream
         services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
             "BookingsProjections",
             builder => builder
