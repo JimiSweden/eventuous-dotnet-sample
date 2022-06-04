@@ -38,7 +38,9 @@ public record BookingState : AggregateState<BookingState, BookingId>
         };
 
     static BookingState HandleBooked(BookingState state, V1.RoomBooked booked)
-        => state with {
+    {
+
+    return state with {
             Id = new BookingId(booked.BookingId),
             RoomId = new RoomId(booked.RoomId),
             Period = new StayPeriod(booked.CheckInDate, booked.CheckOutDate),
@@ -46,6 +48,8 @@ public record BookingState : AggregateState<BookingState, BookingId>
             Price = new Money { Amount = booked.BookingPrice, Currency = booked.Currency },
             Outstanding = new Money { Amount = booked.OutstandingAmount, Currency = booked.Currency }
         };
+    }
+
 
     static BookingState HandleBookingChanged(BookingState state, V1.BookingChanged changed)
         => state with

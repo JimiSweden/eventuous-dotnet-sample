@@ -14,6 +14,7 @@ public class BookingsCommandService : ApplicationService<Booking, BookingState, 
     /// <param name="store"></param>
     /// <param name="isRoomAvailable"></param>
     public BookingsCommandService(IAggregateStore store, Services.IsRoomAvailable isRoomAvailable) : base(store) {
+
         OnNewAsync<BookRoom>(
             (booking, cmd, _) => booking.BookRoom(
                 new BookingId(cmd.BookingId),

@@ -1,0 +1,18 @@
+<!--<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>-->
+
+
+<!--EXTERNAL_PROPERTIES: EventuousVersion-->
+<Project Sdk="Microsoft.NET.Sdk">
+	<ItemGroup>
+		<PackageReference Include="Eventuous" Version="$(EventuousVersion)" />
+		<PackageReference Include="NodaTime" Version="3.0.10" />
+	</ItemGroup>
+</Project>

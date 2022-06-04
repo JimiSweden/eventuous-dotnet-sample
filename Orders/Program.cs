@@ -1,14 +1,21 @@
-using Bookings;
-using Bookings.Domain.Bookings;
+
 using Eventuous;
 using Eventuous.AspNetCore;
 using Eventuous.Diagnostics.Logging;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
+using Orders;
+using Orders.Domain.Orders;
 using Serilog;
 using Serilog.Events;
 
-TypeMap.RegisterKnownEventTypes(typeof(BookingEvents.V1.RoomBooked).Assembly);
+
+/*
+ * API is running on port 44320 (if not changed in launchsettings.json)
+ */
+
+//register event types from assembly; EventTypes must be decorated with attribute, ex: [EventType("V1.OrderAdded")]
+TypeMap.RegisterKnownEventTypes(typeof(OrderEvents.V1.OrderAdded).Assembly);
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -21,6 +28,7 @@ Log.Logger = new LoggerConfiguration()
     //.WriteTo.Seq("http://localhost:5341") //Serilog needs to be installed for this
     .CreateLogger();
 
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
@@ -29,8 +37,9 @@ builder.Services
     .AddJsonOptions(cfg => cfg.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddOpenTelemetry(); //in Registrations.cs
+//builder.Services.AddOpenTelemetry();
 builder.Services.AddEventuous(builder.Configuration); //in Registrations.cs
+
 
 var app = builder.Build();
 
@@ -38,21 +47,24 @@ app.UseSerilogRequestLogging();
 app.AddEventuousLogs();
 app.UseSwagger().UseSwaggerUI();
 app.MapControllers();
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
+//app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
-var factory  = app.Services.GetRequiredService<ILoggerFactory>();
+var factory = app.Services.GetRequiredService<ILoggerFactory>();
 var listener = new LoggingEventListener(factory, "OpenTelemetry");
 
-try {
+try
+{
     app.Run();
-    //app.Run("http://*:5003");
+    //app.Run("http://*:5020");
     return 0;
 }
-catch (Exception e) {
+catch (Exception e)
+{
     Log.Fatal(e, "Host terminated unexpectedly");
     return 1;
 }
-finally {
+finally
+{
     Log.CloseAndFlush();
     listener.Dispose();
 }

@@ -57,6 +57,10 @@ http://localhost:51219/swagger/index.html
 https://localhost:44352/swagger/index.html
 http://localhost:51218/swagger/index.html
 
+## Orders
+https://localhost:44320/swagger/index.html
+http://localhost:51220/swagger/index.html
+
 ### Usage examples:
 ### booking: https://localhost:44352/booking/book
 ```json
