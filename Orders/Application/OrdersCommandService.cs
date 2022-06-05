@@ -35,6 +35,7 @@ namespace Orders.Application
             /* OnExisting operates on the Id to get the existing order, 
              * then the "change" uses the State.Id internally
             */
+
             OnExistingAsync<OrderCommands.BookOrder>(
                 cmd => new OrderId(cmd.OrderId),
                 (order, cmd, _) => order.BookOrder(
@@ -45,6 +46,14 @@ namespace Orders.Application
                         )
                 );
 
+            OnExistingAsync<OrderCommands.UnBookOrder>(
+                cmd => new OrderId(cmd.OrderId),
+                (order, cmd, _) => order.UnBookOrder(
+                    cmd.Reason,
+                    cmd.UnBookedBy,
+                    DateTimeOffset.Now
+                )
+            );
 
             OnExistingAsync<OrderCommands.CancelOrder>(
                 cmd => new OrderId(cmd.OrderId),

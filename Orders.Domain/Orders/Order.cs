@@ -13,7 +13,8 @@ namespace Orders.Domain.Orders
     /// <summary>
     /// The Aggregate class is used for validating the commands
     /// from the CommandService (i.e. CommandHandler) <br/>
-    ///
+    /// (CommandService is found in Orders.Application)
+    /// <br />
     /// Apply then Applies a new event to the state,
     /// adds the event to the list of pending changes,
     /// and increases the current version.
@@ -119,8 +120,37 @@ namespace Orders.Domain.Orders
 
 
         //todo: unbook / unlock /open for edit.
-        //todo: cancel
 
+        public async Task UnBookOrder(
+            string reason,
+            string unBookedBy,
+            DateTimeOffset orderUnBookedAt
+        )
+        {
+            EnsureExists();
+
+            if (!State.Booked)
+            {
+                throw new DomainException("Order is not Booked yet and thus can't be un-booked/reopened");
+            }
+
+            if (State.Cancelled)
+            {
+                throw new DomainException(
+                    $"Order cannot be un-booked/reopened, it was cancelled at; {State.OrderCancelledDate}, by: {State.CancelledBy}");
+            }
+
+
+            //todo: business validation, if it can be unbooked/reopened
+            //(due to time , handling status such as being packed or already shipped etc.
+
+            Apply(new OrderEvents.V1.OrderUnBooked(
+                State.Id,
+                reason,
+                unBookedBy,
+                orderUnBookedAt
+            ));
+        }
 
 
         public async Task CancelOrder(

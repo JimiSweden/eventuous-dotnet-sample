@@ -29,7 +29,7 @@ namespace Orders.Domain.Orders
             [EventType("V1.OrderBooked")]
             public record OrderBooked(
                 string OrderId,
-                //string customerId,
+                //string bookedBy, //todo
                 DateTimeOffset OrderBookedDate,
                 // IEnumerable<string> orderRowIds,
                 float OrderPrice,
@@ -86,6 +86,14 @@ namespace Orders.Domain.Orders
                 DateTimeOffset OrderCancelledAt
                 );
 
+
+            [EventType("V1.OrderUnBooked")]
+            public record OrderUnBooked(
+                OrderId OrderId,
+                string Reason,
+                string UnBookedBy,
+                DateTimeOffset OrderUnBookedAt
+            );
         }
 
     }

@@ -43,6 +43,13 @@ namespace Orders.Application
             string PaidBy
         );
 
+        public record UnBookOrder(
+            string OrderId,
+            string Reason,
+            string UnBookedBy,
+            DateTimeOffset OrderUnBookedAt
+        );
+        
         public record CancelOrder(
             string OrderId,
             string Reason,

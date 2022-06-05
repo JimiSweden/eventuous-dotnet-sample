@@ -44,6 +44,19 @@ namespace Orders.HttpApi.Orders
             CancellationToken cancellationToken)
             => Handle(cmd, cancellationToken);
 
+        /// <summary>
+        /// unbook, i.e. reopen order for editing after it has been booked
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("unbook")]
+        public Task<ActionResult<Result>> UnBookOrder(
+            [FromBody] OrderCommands.UnBookOrder cmd,
+            CancellationToken cancellationToken)
+            => Handle(cmd, cancellationToken);
+
 
         [HttpPost]
         [Route("cancel")]

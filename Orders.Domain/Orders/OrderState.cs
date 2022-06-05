@@ -51,7 +51,7 @@ public record OrderState : AggregateState<OrderState, OrderId>
     /// </summary>
     public DateTimeOffset OrderCreatedDate { get; set; }
 
-    /* TODO ? perhaps refactor to a "OrderState" containing
+    /* TODO ? perhaps refactor to a "OrderBookingState" containing
      * Booked, Cancelled (and related info), ReOpened ?
      *
      */
@@ -65,7 +65,7 @@ public record OrderState : AggregateState<OrderState, OrderId>
     /// if not booked, it is still open for changes (like a in a customer shopping-cart)
     /// </summary>
     public bool Booked { get; init; }
-
+    
     public DateTimeOffset OrderCancelledDate { get; set; }
     public bool Cancelled { get; init; }
     public string  CancelledBy { get; set; }
@@ -99,9 +99,11 @@ public record OrderState : AggregateState<OrderState, OrderId>
         //from order.AddOrder
         On<OrderEvents.V1.OrderAdded>(HandleAdded);
 
-        
         //from order.BookOrder
         On<OrderEvents.V1.OrderBooked>(HandleBooked);
+
+        //from order.UnBookOrder
+        On<OrderEvents.V1.OrderUnBooked>(HandleUnBooked);
 
         //from order.CancelOrder
         On<OrderEvents.V1.OrderCancelled>(HandleCancelled);
@@ -114,8 +116,7 @@ public record OrderState : AggregateState<OrderState, OrderId>
             state with { Paid = true });
     }
 
-   
-
+    
 
     /* a note on records "with"
      * 'record with' will "modify" the props set here,
@@ -159,6 +160,15 @@ public record OrderState : AggregateState<OrderState, OrderId>
             CancelledBy = cancelled.CancelledBy,
             CancelledReason = cancelled.Reason,
             OrderCancelledDate = cancelled.OrderCancelledAt
+        };
+    }
+
+    private OrderState HandleUnBooked(OrderState state, OrderEvents.V1.OrderUnBooked unBooked)
+    {
+        return state with
+        {
+            Booked = false,
+            OrderBookedDate = default,
         };
     }
 
