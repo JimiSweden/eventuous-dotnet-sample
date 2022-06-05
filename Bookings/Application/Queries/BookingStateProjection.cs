@@ -9,7 +9,7 @@ namespace Bookings.Application.Queries;
 /// <summary>
 /// This is used to update the pojection BookingDocument, in MongoDb, 
 /// it gets the data from the event-store
-/// 
+/// README : https://github.com/Eventuous/eventuous/tree/ce728bb13fa11ac220b4dfe7d8dc7d8e4b9abf3f/src/Mongo/src/Eventuous.Projections.MongoDB
 /// </summary>
 public class BookingStateProjection : MongoProjection<BookingDocument> {
     public BookingStateProjection(IMongoDatabase database) : base(database) {
