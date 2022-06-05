@@ -77,5 +77,32 @@ namespace Orders.HttpApi.Orders
 
         }
 
+
+        /// <summary>
+        /// This reads from the AggregateStore, that is the EventStoreDB in our case (default)
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        //[HttpGet]
+        //public async Task<OrderState> GetOrders(CancellationToken cancellationToken)
+        //{
+
+        //    //try
+        //    //{
+        //    //    var order = await _store. <List<Order>>(cancellationToken);
+
+        //    //    //State returns the current aggregate state, i.e. latest data.
+        //    //    return order.State;
+
+        //    //}
+        //    //catch (Eventuous.AggregateNotFoundException e) when (e.Message.Contains("not found."))
+        //    //{
+        //    //    //todo: logging...
+        //    //    Debugger.Break();
+        //    //    throw;
+        //    //}
+
+        //}
+
     }
 }

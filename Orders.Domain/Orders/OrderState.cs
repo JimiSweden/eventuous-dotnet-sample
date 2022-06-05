@@ -77,6 +77,15 @@ public record OrderState : AggregateState<OrderState, OrderId>
     public ImmutableList<PaymentRecord> PaymentRecords { get; init; } = ImmutableList<PaymentRecord>.Empty;
 
     /// <summary>
+    /// order rows get the Id from product id,
+    /// since the row only contains one type of product or service.
+    /// </summary>
+    /// <param name="productId"></param>
+    /// <returns></returns>
+    public bool HasOrderRowWithMatchingId(string productId)
+        => OrderRows.Any(row => row.Id == productId);
+
+    /// <summary>
     /// ensure only unique payments.
     /// </summary>
     /// <param name="paymentId"></param>
@@ -108,6 +117,9 @@ public record OrderState : AggregateState<OrderState, OrderId>
         //from order.CancelOrder
         On<OrderEvents.V1.OrderCancelled>(HandleCancelled);
 
+        //from order.AddOrderRow
+        On<OrderEvents.V1.OrderRowAdded>(HandleOrderRowAdded);
+
         //from order.RecordPayment
         On<OrderEvents.V1.PaymentRecorded>(HandlePayment);
 
@@ -116,7 +128,26 @@ public record OrderState : AggregateState<OrderState, OrderId>
             state with { Paid = true });
     }
 
-    
+    private OrderState HandleOrderRowAdded(OrderState state, OrderEvents.V1.OrderRowAdded rowAdded)
+    {
+        return state with
+        {
+            OrderRows = state.OrderRows.Add(
+                new OrderRow(
+                    new OrderRowId(rowAdded.OrderRowId),
+                    new ProductOrService(
+                        new ProductOrServiceId(rowAdded.ProductId),
+                        rowAdded.ProductType,
+                        rowAdded.ProductName,
+                        rowAdded.ProductDescription,
+                        new Money(rowAdded.ProductPrice, rowAdded.Currency)
+                        ),
+                    rowAdded.ProductAmount
+                    )
+                )
+        };
+    }
+
 
     /* a note on records "with"
      * 'record with' will "modify" the props set here,
@@ -157,6 +188,7 @@ public record OrderState : AggregateState<OrderState, OrderId>
         return state with
         {
             Cancelled = true,
+            Booked = false,
             CancelledBy = cancelled.CancelledBy,
             CancelledReason = cancelled.Reason,
             OrderCancelledDate = cancelled.OrderCancelledAt
@@ -186,4 +218,5 @@ public record OrderState : AggregateState<OrderState, OrderId>
         };
     }
 
+    
 }

@@ -42,18 +42,22 @@ namespace Orders.Domain.Orders
             [EventType("V1.OrderRowAdded")]
             public record OrderRowAdded(
                 string OrderId,
-                string OrderRowId,
+                string OrderRowId, //same as productId
                 string ProductId,
-                int ProductAmount
+                int ProductAmount,
+                string ProductName,
+                string ProductType,
+                string ProductDescription,
+                float ProductPrice,
+                string Currency
                 );
 
             [EventType("V1.OrderRowDeleted")]
             public record OrderRowDeleted(
                 string OrderId,
                 string OrderRowId,
-                string ProductId,
-                int ProductAmount
-                );
+                string ProductId
+            );
 
             //i.e. product added / removed from row 
             [EventType("V1.OrderRowAmountChanged")]

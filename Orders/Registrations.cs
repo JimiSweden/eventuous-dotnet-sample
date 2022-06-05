@@ -51,6 +51,18 @@ namespace Orders;
         //services.AddSingleton<Services.ConvertCurrency>((from, currency) => new Money(from.Amount * 2, currency));
 
 
+        //AllStreamSubscription is a Catch - up subscription for EventStoreDB, using the $all global stream
+        //services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
+        //    "OrdersProjections",
+        //    builder => builder
+        //        .Configure(cfg => cfg.ConcurrencyLimit = 2)
+        //        .AddEventHandler<BookingStateProjection>()
+        //        .AddEventHandler<MyBookingsProjection>()
+        //        //TODO: add projection holding the available rooms and booked dates
+        //        .WithPartitioningByStream(2)
+        //);
+
+
 
         //todo: enable mongo db for projections.. 
         //services.AddSingleton(Mongo.ConfigureMongo(configuration)); 

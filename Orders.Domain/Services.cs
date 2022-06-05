@@ -22,8 +22,8 @@ namespace Orders.Domain
         /// <param name="roomId"></param>
         /// <param name="period"></param>
         /// <returns></returns>
-        public delegate ValueTask<bool> IsProductAvailable(ProductId productId, int amount);
-        public delegate ValueTask<int> MaxProductsOrderable(ProductId productId);
+        public delegate ValueTask<bool> IsProductAvailable(ProductOrServiceId productOrServiceId, int amount);
+        public delegate ValueTask<int> MaxProductsOrderable(ProductOrServiceId productOrServiceId);
 
         //see dummy implementation in service.. 
         //public delegate Money ConvertCurrency(Money from, string targetCurrency);
@@ -33,13 +33,13 @@ namespace Orders.Domain
     {
         static int AmountInWarehouse = 29;
 
-        public static ValueTask<bool> IsProductAvailable(ProductId productId, int amount)
+        public static ValueTask<bool> IsProductAvailable(ProductOrServiceId productOrServiceId, int amount)
         {
             
             return AmountInWarehouse > amount ? new ValueTask<bool>(false) : new ValueTask<bool>(true);
         }
 
-        public static ValueTask<int> MaxProductsOrderable(ProductId productId)
+        public static ValueTask<int> MaxProductsOrderable(ProductOrServiceId productOrServiceId)
         {
             return new ValueTask<int>(AmountInWarehouse);
         }

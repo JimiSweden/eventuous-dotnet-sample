@@ -118,9 +118,6 @@ namespace Orders.Domain.Orders
 
         }
 
-
-        //todo: unbook / unlock /open for edit.
-
         public async Task UnBookOrder(
             string reason,
             string unBookedBy,
@@ -186,7 +183,76 @@ namespace Orders.Domain.Orders
         }
 
 
+        /// <summary>
+        /// //todo: 
+        /// //the following props would be fetched
+        /// // from a product service.. 
+        /// // but for now lets keep them here.
+        /// string ProductName,
+        /// string ProductType,
+        /// string ProductDescription,
+        /// float ProductPrice,
+        /// string Currency
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="productAmount"></param>
+        /// <returns></returns>
+        /// <exception cref="DomainException"></exception>
+        public async Task AddOrderRow(
+            string orderRowId,
+            string productId,
+            int productAmount,
+            string productName,
+            string productType,
+            string productDescription,
+            float productPrice,
+            string currency,
+            DateTimeOffset OrderRowAddedAt
+        )
+        {
+            EnsureExists();
 
+            if (State.Booked)
+            {
+                throw new DomainException("Order is already Booked, cant add new products");
+            }
+
+            if (State.Cancelled)
+            {
+                throw new DomainException(
+                    $"Order cannot be changed, it was cancelled at; {State.OrderCancelledDate}, by: {State.CancelledBy}");
+            }
+
+            if (State.HasOrderRowWithMatchingId(productId))
+            {
+                throw new DomainException("cannot add multiple rows of same type/Id");
+            }
+
+            /*
+            //todo: 
+            //the following props would be fetched
+            // from a product service.. 
+            // but for now lets keep them here.
+            string ProductName,
+            string ProductType,
+            string ProductDescription,
+            float ProductPrice,
+            string Currency
+                */
+
+            Apply(new OrderEvents.V1.OrderRowAdded(
+                State.Id,
+                orderRowId, 
+                productId, 
+                productAmount, 
+                productName, 
+                productType,
+                productDescription, 
+                productPrice, 
+                currency
+            ));
+
+        }
 
         public void RecordPayment(
             Money paid,

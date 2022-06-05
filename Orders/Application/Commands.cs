@@ -56,5 +56,22 @@ namespace Orders.Application
             string CancelledBy,
             DateTimeOffset OrderCancelledAt
         );
+
+        public record AddOrderRow(
+            string OrderId,
+            string OrderRowId, //same as productId
+            string ProductId,
+            int ProductAmount,
+            //todo: 
+            //following props would be fetched in Order.cs
+            // from a product service.. 
+            // but for now lets keep them here.
+            string ProductName,
+            string ProductType,
+            string ProductDescription,
+            float ProductPrice,
+            string Currency
+        );
+
     }
 }

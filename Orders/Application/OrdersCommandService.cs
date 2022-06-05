@@ -63,6 +63,27 @@ namespace Orders.Application
                     DateTimeOffset.Now
                     )
                 );
+
+
+            OnExistingAsync<OrderCommands.AddOrderRow>(
+                cmd => new OrderId(cmd.OrderId),
+                (order, cmd, _) => order.AddOrderRow(
+                    cmd.OrderRowId,
+                    cmd.ProductId,
+                    cmd.ProductAmount,
+                    //todo: 
+                    //following props would be fetched in Order.cs
+                    // from a product service.. 
+                    // but for now lets keep them here.
+                    cmd.ProductName,
+                    cmd.ProductType,
+                    cmd.ProductDescription,
+                    cmd.ProductPrice,
+                    cmd.Currency,
+                    //--<
+                    DateTimeOffset.Now
+                )
+            );
         }
     }
     

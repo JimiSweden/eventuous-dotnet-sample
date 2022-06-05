@@ -68,6 +68,15 @@ namespace Orders.HttpApi.Orders
 
 
         [HttpPost]
+        [Route("row/add")]
+        public Task<ActionResult<Result>> AddOrderRow(
+            [FromBody] OrderCommands.AddOrderRow cmd,
+            CancellationToken cancellationToken)
+            => Handle(cmd, cancellationToken);
+
+
+
+        [HttpPost]
         [Route("recordPayment")]
         public Task<ActionResult<Result>> RecordPayment(
             [FromBody] OrderCommands.RecordPayment cmd, 
