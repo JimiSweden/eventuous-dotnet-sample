@@ -4,9 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Orders.Domain;
+using Orders.HttpApi.Orders;
 
 namespace Orders.Application
 {
+    /// <summary>
+    /// Commands are what is coming in from your <see cref="CommandApi"/> <br/>
+    /// They have what is needed for the intention of the command <br/>
+    /// (And should not be confused with the events, OrderEvents, in the domain <br/>
+    /// although they should match at least to some degree
+    /// 
+    /// </summary>
     public class OrderCommands
     {
         public record AddOrder(

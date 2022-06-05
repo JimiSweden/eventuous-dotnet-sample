@@ -24,6 +24,26 @@ namespace Orders.HttpApi.Orders
         * https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mongo-app?view=aspnetcore-6.0&tabs=visual-studio#add-a-crud-operations-service
         */
 
+        /*
+         * If you want to read "collections" from eventstore (not using mongo db projections)
+         * you can create a subscription with filter as described here.
+         * https://developers.eventstore.com/clients/grpc/subscriptions.html#filtering-by-event-type
+         *
+         * here is an example from https://discuss.eventstore.com/t/read-all-events-of-stream-type/3368/3
+         * using the Category strem '$ce'
+         *     var events = eventStoreClient.ReadStreamAsync(Direction.Forwards, "$ce-TechnologyGroup", StreamPosition.Start, resolveLinkTos: true);
+           await foreach (var @event in events)
+           {
+           var eventType = Type.GetType($"{@event.Event.EventType}");
+           
+           IDomainEvent domainEvent = (IDomainEvent)JsonConvert.DeserializeObject(
+           Encoding.UTF8.GetString(@event.Event.Data.ToArray()),
+           eventType);
+           }
+         *
+         */
+
+
         public QueryApi(IAggregateStore store)
         {
             _store = store;

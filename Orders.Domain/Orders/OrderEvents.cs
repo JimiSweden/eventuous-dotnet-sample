@@ -29,8 +29,8 @@ namespace Orders.Domain.Orders
             [EventType("V1.OrderBooked")]
             public record OrderBooked(
                 string OrderId,
-                string customerId,
-                LocalDate OrderBookedDate,
+                //string customerId,
+                DateTimeOffset OrderBookedDate,
                 // IEnumerable<string> orderRowIds,
                 float OrderPrice,
                 float PrepaidAmount,

@@ -5,11 +5,16 @@ using NodaTime;
 namespace Orders.Domain.Orders;
 
 public record PaymentRecord(string PaymentId, Money PaidAmount);
-
+public record DiscountRecord(Money Discount, string Reason);
 
 /// <summary>
 /// OrderState is used to build the aggregate state from events <br/>
-/// record, instead of class, ensures Imutability. it is always 'newed'
+/// record, instead of class, ensures Imutability. it is always 'newed'. <br/>
+/// Important note:
+/// No business-logic-validations or altering of a state is "possible".<br/>
+/// The current state is the truth from the events in history.<br/>
+/// Business validations are made in the Aggregate (<see cref="Order"/>.cs)<br/>
+/// Before Applying the event (creating/adding the changes of this states history)
 /// </summary>
 public record OrderState : AggregateState<OrderState, OrderId>
 {
@@ -26,16 +31,26 @@ public record OrderState : AggregateState<OrderState, OrderId>
     //public OrderId Id { get; set; }
     public string CustomerId { get; set; }
 
+    /* a note on DateTimeOffset vs DateTime
+     * The DateTimeOffset structure represents a date and time value,
+     * together with an offset that indicates how much that value differs from UTC.
+     * Thus, the value always unambiguously identifies a single point in time.
+     * The DateTimeOffset type includes all of the functionality of the DateTime type
+     * along with time zone awareness. 
+     */
+
+
     /// <summary>
-    /// When order was submitted from customer
+    /// When order was submitted (as finished/book) from customer
     /// perhaps not needed? if using date from EventStore TimeStamp
     /// </summary>
-    public LocalDate OrderBookedDate { get; set; }
-        
+    public DateTimeOffset OrderBookedDate { get; set; }
+
     /// <summary>
     /// when initial order was created
+    /// perhaps not needed? if using date from EventStore TimeStamp
     /// </summary>
-    public DateTime OrderCreatedDate { get; set; }
+    public DateTimeOffset OrderCreatedDate { get; set; }
     public Money Price { get; init; }
     public Money Outstanding { get; init; }
     public Money Discount { get; init; }
@@ -55,13 +70,26 @@ public record OrderState : AggregateState<OrderState, OrderId>
     public InvoiceAddress InvoiceAddress{ get; set; }
 
 
+    /// <summary>
+    /// note: the state will run through all events
+    /// when fetching the order from EventStoreDB,
+    /// The events are stored by the aggregate Order, in the Apply methods
+    /// </summary>
     public OrderState()
     {
+        //from order.AddOrder
         On<OrderEvents.V1.OrderAdded>(HandleAdded);
+
+        
+        //from order.BookOrder
         On<OrderEvents.V1.OrderBooked>(HandleBooked);
 
+        //from order.RecordPayment
         On<OrderEvents.V1.PaymentRecorded>(HandlePayment);
-        On<OrderEvents.V1.OrderFullyPaid>((state, paid) => state with { Paid = true });
+
+        //from order.RecordPayment / MarkFullyPaidIfNecessary
+        On<OrderEvents.V1.OrderFullyPaid>((state, paid) => 
+            state with { Paid = true });
     }
 
 
@@ -78,7 +106,7 @@ public record OrderState : AggregateState<OrderState, OrderId>
         {
             Id = new OrderId(added.OrderId),
             CustomerId = added.CustomerId,
-            OrderCreatedDate = added.OrderCreatedDate.LocalDateTime
+            OrderCreatedDate = added.OrderCreatedDate
         };
     }
 
@@ -86,14 +114,22 @@ public record OrderState : AggregateState<OrderState, OrderId>
     {
         return state with
         {
+            Booked = true, //since this a Handler reading Events we know it is booked.
             Price = new Money(booked.OrderPrice, booked.Currency),
             Outstanding = new Money(booked.OutstandingAmount, booked.Currency),
             Discount = new Money(booked.DiscountAmount, booked.Currency),
-            OrderBookedDate = booked.OrderBookedDate
+            OrderBookedDate = booked.OrderBookedDate,
+            
+            // Note: payment if direct should be set before Booking allowed, thus no need to 
+            //Paid = Outstanding.Amount == 0, 
             //todo: shipping address
             //todo: invoice address ? perhaps.. probably 
         };
     }
+
+    //todo: HandleUnbooked, set Booked = false, .
+
+
     private OrderState HandlePayment(OrderState state, OrderEvents.V1.PaymentRecorded payment)
     {
         return state with
@@ -104,13 +140,5 @@ public record OrderState : AggregateState<OrderState, OrderId>
                 )
         };
     }
-    //static BookingState HandlePayment(BookingState state, V1.PaymentRecorded e)
-    //    
-    //    => state with
-    //    {
-    //        Outstanding = new Money { Amount = e.Outstanding, Currency = e.Currency },
-    //        PaymentRecords = state.PaymentRecords.Add(
-    //            new PaymentRecord(e.PaymentId, new Money { Amount = e.PaidAmount, Currency = e.Currency })
-    //        )
-    //    };
+
 }
