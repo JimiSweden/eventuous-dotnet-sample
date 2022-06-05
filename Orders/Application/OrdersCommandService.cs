@@ -6,9 +6,14 @@ using System.Threading.Tasks;
 using Eventuous;
 using Orders.Domain;
 using Orders.Domain.Orders;
+using Orders.HttpApi.Orders;
 
 namespace Orders.Application
 {
+    /// <summary>
+    /// OrdersCommandService is registered in <see cref="Registrations"/> <br/>
+    /// All order commands are executed via CommandHttpApiBase.Handle in the <see cref="CommandApi"/>
+    /// </summary>
     public class OrdersCommandService : ApplicationService<Order, OrderState, OrderId>
     {
         public OrdersCommandService(IAggregateStore store) : base(store)
@@ -38,6 +43,16 @@ namespace Orders.Application
                     new Money(cmd.DiscountAmount, cmd.Currency),
                     DateTimeOffset.Now
                         )
+                );
+
+
+            OnExistingAsync<OrderCommands.CancelOrder>(
+                cmd => new OrderId(cmd.OrderId),
+                (order, cmd, _) => order.CancelOrder(
+                    cmd.Reason,
+                    cmd.CancelledBy,
+                    DateTimeOffset.Now
+                    )
                 );
         }
     }

@@ -35,6 +35,19 @@ namespace Orders.Application
         );
 
 
-        public record RecordPayment(string OrderId, float PaidAmount, string Currency, string PaymentId, string PaidBy);
+        public record RecordPayment(
+            string OrderId, 
+            float PaidAmount, 
+            string Currency, 
+            string PaymentId, 
+            string PaidBy
+        );
+
+        public record CancelOrder(
+            string OrderId,
+            string Reason,
+            string CancelledBy,
+            DateTimeOffset OrderCancelledAt
+        );
     }
 }

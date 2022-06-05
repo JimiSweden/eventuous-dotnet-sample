@@ -31,6 +31,12 @@ public record OrderState : AggregateState<OrderState, OrderId>
     //public OrderId Id { get; set; }
     public string CustomerId { get; set; }
 
+    public Money Price { get; init; }
+    public Money Outstanding { get; init; }
+    public Money Discount { get; init; }
+    public bool Paid { get; init; }
+
+
     /* a note on DateTimeOffset vs DateTime
      * The DateTimeOffset structure represents a date and time value,
      * together with an offset that indicates how much that value differs from UTC.
@@ -39,29 +45,42 @@ public record OrderState : AggregateState<OrderState, OrderId>
      * along with time zone awareness. 
      */
 
+    /// <summary>
+    /// when initial order was created
+    /// perhaps not needed? if using date from EventStore TimeStamp
+    /// </summary>
+    public DateTimeOffset OrderCreatedDate { get; set; }
+
+    /* TODO ? perhaps refactor to a "OrderState" containing
+     * Booked, Cancelled (and related info), ReOpened ?
+     *
+     */
 
     /// <summary>
     /// When order was submitted (as finished/book) from customer
     /// perhaps not needed? if using date from EventStore TimeStamp
     /// </summary>
     public DateTimeOffset OrderBookedDate { get; set; }
-
     /// <summary>
-    /// when initial order was created
-    /// perhaps not needed? if using date from EventStore TimeStamp
-    /// </summary>
-    public DateTimeOffset OrderCreatedDate { get; set; }
-    public Money Price { get; init; }
-    public Money Outstanding { get; init; }
-    public Money Discount { get; init; }
-    public bool Paid { get; init; }
-    /// <summary>
-    /// if not booked, it is still open (like a in a customer cart)
+    /// if not booked, it is still open for changes (like a in a customer shopping-cart)
     /// </summary>
     public bool Booked { get; init; }
 
+    public DateTimeOffset OrderCancelledDate { get; set; }
+    public bool Cancelled { get; init; }
+    public string  CancelledBy { get; set; }
+    public string  CancelledReason { get; set; }
+
+    //todo: OrderFullFilled (completed, end-state), OrderDelivered, OrderShipped
+
     public ImmutableList<OrderRow> OrderRows { get; set; } = ImmutableList<OrderRow>.Empty;
     public ImmutableList<PaymentRecord> PaymentRecords { get; init; } = ImmutableList<PaymentRecord>.Empty;
+
+    /// <summary>
+    /// ensure only unique payments.
+    /// </summary>
+    /// <param name="paymentId"></param>
+    /// <returns></returns>
     internal bool HasPaymentBeenRecorded(string paymentId) => PaymentRecords.Any(x => x.PaymentId == paymentId);
 
     //TODO: Invoice- , Shipping Address and Delivery options
@@ -84,6 +103,9 @@ public record OrderState : AggregateState<OrderState, OrderId>
         //from order.BookOrder
         On<OrderEvents.V1.OrderBooked>(HandleBooked);
 
+        //from order.CancelOrder
+        On<OrderEvents.V1.OrderCancelled>(HandleCancelled);
+
         //from order.RecordPayment
         On<OrderEvents.V1.PaymentRecorded>(HandlePayment);
 
@@ -91,6 +113,8 @@ public record OrderState : AggregateState<OrderState, OrderId>
         On<OrderEvents.V1.OrderFullyPaid>((state, paid) => 
             state with { Paid = true });
     }
+
+   
 
 
     /* a note on records "with"
@@ -124,6 +148,17 @@ public record OrderState : AggregateState<OrderState, OrderId>
             //Paid = Outstanding.Amount == 0, 
             //todo: shipping address
             //todo: invoice address ? perhaps.. probably 
+        };
+    }
+
+    private OrderState HandleCancelled(OrderState state, OrderEvents.V1.OrderCancelled cancelled)
+    {
+        return state with
+        {
+            Cancelled = true,
+            CancelledBy = cancelled.CancelledBy,
+            CancelledReason = cancelled.Reason,
+            OrderCancelledDate = cancelled.OrderCancelledAt
         };
     }
 

@@ -77,6 +77,15 @@ namespace Orders.Domain.Orders
 
             [EventType("V1.FullyPaid")]
             public record OrderFullyPaid(string OrderId, DateTimeOffset FullyPaidAt);
+
+            [EventType("V1.OrderCancelled")]
+            public record OrderCancelled(
+                OrderId OrderId, 
+                string Reason, 
+                string CancelledBy, 
+                DateTimeOffset OrderCancelledAt
+                );
+
         }
 
     }

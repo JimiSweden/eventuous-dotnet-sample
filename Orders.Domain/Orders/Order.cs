@@ -11,7 +11,8 @@ namespace Orders.Domain.Orders
 {
 
     /// <summary>
-    /// The Aggregate class is used for validating the commands from the CommandService
+    /// The Aggregate class is used for validating the commands
+    /// from the CommandService (i.e. CommandHandler) <br/>
     ///
     /// Apply then Applies a new event to the state,
     /// adds the event to the list of pending changes,
@@ -19,6 +20,25 @@ namespace Orders.Domain.Orders
     /// </summary>
     public class Order : Aggregate<OrderState, OrderId>
     {
+        /// <summary>
+        /// TODO: OrderId should be created here, not from outside.
+        /// {customerId}_{orderCreatedAt} / perhaps.. 
+        /// ex: 12346_2022-06-04 193056 : where 193056 HHMMSS
+        /// Possible problems with timestamp in Id
+        /// is if a user creates multiple orders by mistake.
+        ///
+        /// TODO ? : Order should perhaps not contain logic for adding and removing rows
+        /// and creating empty order etc..
+        /// Instead a CustomerCart aggregate can contain that type of history
+        /// - and when confirming everything in the cart, the order is created and booked
+        /// at the same time. <br/>
+        /// But, then again, altering the order rows might be a wanted function
+        /// - 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <param name="customerId"></param>
+        /// <param name="orderCreatedAt"></param>
+        /// <returns></returns>
         public async Task AddOrder(
             OrderId orderId,
             string customerId,
@@ -26,8 +46,8 @@ namespace Orders.Domain.Orders
         )
         {
             //from the Eventuous base class 'Aggregate'
-            //and checks that the CurrentVersion is not set,
-            //will throw a 'DomainException' if it does
+            //checks that the CurrentVersion is not set (i.e. Aggregate exists)
+            //will throw a 'DomainException' if it is
             EnsureDoesntExist();
 
             try
@@ -77,6 +97,8 @@ namespace Orders.Domain.Orders
             /* todo: validate
              *  [ ] that the order has orderRows
              *  [ ] order is either payed or customer is allowed to be invoiced
+             *   ex: - not paid and invoicing not allowed,
+        *        - or not paid and customer outstanding total exceeds credit limit
              *
              */
 
@@ -99,6 +121,43 @@ namespace Orders.Domain.Orders
         //todo: unbook / unlock /open for edit.
         //todo: cancel
 
+
+
+        public async Task CancelOrder(
+            string reason,
+            string cancelledBy,
+            DateTimeOffset orderCancelledAt
+        )
+        {
+            EnsureExists();
+
+            if (!State.Booked)
+            {
+                throw new DomainException("Order is not Booked yet and thus can't be cancelled");
+            }
+
+            if (State.Cancelled)
+            {
+                throw new DomainException($"Order is already cancelled at; {State.OrderCancelledDate}, by: {State.CancelledBy}");
+            }
+
+
+            //todo: validate business rules if order can be cancelled.
+            
+
+
+            Apply(new OrderEvents.V1.OrderCancelled(
+                State.Id,
+                reason,
+                cancelledBy,
+                orderCancelledAt
+            ));
+
+        }
+
+
+
+
         public void RecordPayment(
             Money paid,
             string paymentId,
@@ -110,6 +169,11 @@ namespace Orders.Domain.Orders
             //and checks that the CurrentVersion is set,
             //will throw a 'DomainException' if it does Not.
             EnsureExists();
+
+            if (State.Cancelled)
+            {
+                throw new DomainException("Order is canceled thus can't be cancelled");
+            }
 
             if (State.HasPaymentBeenRecorded(paymentId)) return;
 

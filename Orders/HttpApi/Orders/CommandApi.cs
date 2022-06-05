@@ -45,6 +45,14 @@ namespace Orders.HttpApi.Orders
             => Handle(cmd, cancellationToken);
 
 
+        [HttpPost]
+        [Route("cancel")]
+        public Task<ActionResult<Result>> CancelOrder(
+            [FromBody] OrderCommands.CancelOrder cmd,
+            CancellationToken cancellationToken)
+            => Handle(cmd, cancellationToken);
+
+
 
         [HttpPost]
         [Route("recordPayment")]
