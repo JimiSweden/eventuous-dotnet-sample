@@ -12,6 +12,7 @@ using Eventuous.Subscriptions.Registrations;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using Orders.Application;
+using Orders.Application.Queries;
 using Orders.Domain;
 using Orders.Domain.Orders;
 using Orders.Infrastructure;
@@ -51,16 +52,15 @@ namespace Orders;
         //services.AddSingleton<Services.ConvertCurrency>((from, currency) => new Money(from.Amount * 2, currency));
 
 
-        //AllStreamSubscription is a Catch - up subscription for EventStoreDB, using the $all global stream
-        //services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
-        //    "OrdersProjections",
-        //    builder => builder
-        //        .Configure(cfg => cfg.ConcurrencyLimit = 2)
-        //        .AddEventHandler<BookingStateProjection>()
-        //        .AddEventHandler<MyBookingsProjection>()
-        //        //TODO: add projection holding the available rooms and booked dates
-        //        .WithPartitioningByStream(2)
-        //);
+        //AllStreamSubscription is a Catch-up subscription for EventStoreDB, using the $all global stream
+        services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
+            "OrdersProjections",
+            builder => builder
+                .Configure(cfg => cfg.ConcurrencyLimit = 2)
+                .AddEventHandler<OrderStateProjection>() //current state
+                .AddEventHandler<MyOrdersProjection>() //all added orders by customer
+                .WithPartitioningByStream(2)
+        );
 
 
 

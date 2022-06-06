@@ -26,8 +26,4 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Orders.Domain\Orders.Domain.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Application\Queries\" />
-	</ItemGroup>
 </Project>
