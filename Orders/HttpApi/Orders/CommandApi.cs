@@ -3,6 +3,8 @@ using Eventuous;
 using Eventuous.AspNetCore.Web;
 using Microsoft.AspNetCore.Mvc;
 //using Microsoft.AspNetCore.Authorization; //TODO..
+// read https://eventuous.dev/docs/application/command-api/
+// "Then, you can use the HttpContext data in your command:"
 using Orders.Application;
 using Orders.Domain.Orders;
 

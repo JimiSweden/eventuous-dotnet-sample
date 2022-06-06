@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Eventuous;
-using NodaTime;
 
 namespace Orders.Domain.Orders;
 
@@ -128,26 +127,7 @@ public record OrderState : AggregateState<OrderState, OrderId>
             state with { Paid = true });
     }
 
-    private OrderState HandleOrderRowAdded(OrderState state, OrderEvents.V1.OrderRowAdded rowAdded)
-    {
-        return state with
-        {
-            OrderRows = state.OrderRows.Add(
-                new OrderRow(
-                    new OrderRowId(rowAdded.OrderRowId),
-                    new ProductOrService(
-                        new ProductOrServiceId(rowAdded.ProductId),
-                        rowAdded.ProductType,
-                        rowAdded.ProductName,
-                        rowAdded.ProductDescription,
-                        new Money(rowAdded.ProductPrice, rowAdded.Currency)
-                        ),
-                    rowAdded.ProductAmount
-                    )
-                )
-        };
-    }
-
+   
 
     /* a note on records "with"
      * 'record with' will "modify" the props set here,
@@ -204,7 +184,25 @@ public record OrderState : AggregateState<OrderState, OrderId>
         };
     }
 
-    //todo: HandleUnbooked, set Booked = false, .
+    private OrderState HandleOrderRowAdded(OrderState state, OrderEvents.V1.OrderRowAdded rowAdded)
+    {
+        return state with
+        {
+            OrderRows = state.OrderRows.Add(
+                new OrderRow(
+                    new OrderRowId(rowAdded.OrderRowId),
+                    new ProductOrService(
+                        new ProductOrServiceId(rowAdded.ProductId),
+                        rowAdded.ProductType,
+                        rowAdded.ProductName,
+                        rowAdded.ProductDescription,
+                        new Money(rowAdded.ProductPrice, rowAdded.Currency)
+                    ),
+                    rowAdded.ProductAmount
+                )
+            )
+        };
+    }
 
 
     private OrderState HandlePayment(OrderState state, OrderEvents.V1.PaymentRecorded payment)

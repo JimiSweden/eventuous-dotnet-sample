@@ -54,7 +54,7 @@ namespace Orders.Domain.Orders
             try
             {
                 //from the Eventuous base class 'Aggregate'
-                // will AddChange to internal list of pending changes,
+                // will AddChange to internal list of pending changes of this Aggregate,
                 // bump the Current version, and return (previousState, newState)
                 Apply(new OrderEvents.V1.OrderAdded(
                         orderId,
