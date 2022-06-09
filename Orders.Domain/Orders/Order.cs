@@ -254,6 +254,56 @@ namespace Orders.Domain.Orders
 
         }
 
+
+        public async Task DeleteOrderRow(string orderId, string orderRowId, string productId)
+        {
+            EnsureExists();
+
+            if (State.Booked)
+            {
+                throw new DomainException("Order is already Booked, cant remove products");
+            }
+
+            if (State.Cancelled)
+            {
+                throw new DomainException(
+                    $"Order cannot be changed, it was cancelled at; {State.OrderCancelledDate}, by: {State.CancelledBy}");
+            }
+
+            if (!State.HasOrderRowWithMatchingId(orderRowId))
+            {
+                //todo? return; //since row is deleted.. 
+                throw new DomainException("cannot find order row with type/Id");
+            }
+
+            Apply(new OrderEvents.V1.OrderRowDeleted(orderId, orderRowId, productId));
+        }
+
+        public async Task UpdateOrderRowAmount(string orderId, string orderRowId, int productAmount)
+        {
+            EnsureExists();
+
+            if (State.Booked)
+            {
+                throw new DomainException("Order is already Booked, cant update amount of products");
+            }
+
+            if (State.Cancelled)
+            {
+                throw new DomainException(
+                    $"Order cannot be changed, it was cancelled at; {State.OrderCancelledDate}, by: {State.CancelledBy}");
+            }
+
+            if (!State.HasOrderRowWithMatchingId(orderRowId))
+            {
+                //todo? return; //since row is deleted.. 
+                throw new DomainException("cannot find order row with type/Id");
+            }
+
+            Apply(new OrderEvents.V1.OrderRowAmountChanged(orderId, orderRowId, productAmount));
+        }
+
+
         public void RecordPayment(
             Money paid,
             string paymentId,
@@ -296,5 +346,7 @@ namespace Orders.Domain.Orders
 
             Apply(new OrderEvents.V1.OrderFullyPaid(State.Id, when));
         }
+
+        
     }
 }

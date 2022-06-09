@@ -76,6 +76,20 @@ namespace Orders.HttpApi.Orders
             CancellationToken cancellationToken)
             => Handle(cmd, cancellationToken);
 
+        [HttpPost]
+        [Route("row/delete")]
+        public Task<ActionResult<Result>> DeleteOrderRow(
+            [FromBody] OrderCommands.DeleteOrderRow cmd,
+            CancellationToken cancellationToken)
+            => Handle(cmd, cancellationToken);
+        
+        [HttpPost]
+        [Route("row/updateamount")]
+        public Task<ActionResult<Result>> UpdateOrderRowAmount(
+            [FromBody] OrderCommands.UpdateOrderRowAmount cmd,
+            CancellationToken cancellationToken)
+            => Handle(cmd, cancellationToken);
+
 
 
         [HttpPost]

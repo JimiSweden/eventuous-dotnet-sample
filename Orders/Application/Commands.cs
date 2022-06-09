@@ -73,5 +73,17 @@ namespace Orders.Application
             string Currency
         );
 
+        public record DeleteOrderRow(
+            string OrderId,
+            string OrderRowId, //same as productId
+            string ProductId
+        );
+
+        public record UpdateOrderRowAmount(
+            string OrderId,
+            string OrderRowId, //same as productId
+            int ProductAmount
+        );
+
     }
 }

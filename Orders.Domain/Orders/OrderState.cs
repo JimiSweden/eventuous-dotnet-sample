@@ -64,11 +64,11 @@ public record OrderState : AggregateState<OrderState, OrderId>
     /// if not booked, it is still open for changes (like a in a customer shopping-cart)
     /// </summary>
     public bool Booked { get; init; }
-    
+
     public DateTimeOffset OrderCancelledDate { get; set; }
     public bool Cancelled { get; init; }
-    public string  CancelledBy { get; set; }
-    public string  CancelledReason { get; set; }
+    public string CancelledBy { get; set; }
+    public string CancelledReason { get; set; }
 
     //todo: OrderFullFilled (completed, end-state), OrderDelivered, OrderShipped
 
@@ -93,8 +93,8 @@ public record OrderState : AggregateState<OrderState, OrderId>
 
     //TODO: Invoice- , Shipping Address and Delivery options
     // bool ShipToCustomerAddress, || ShippingAddress
-    public ShippingAddress ShippingAddress{ get; set; }
-    public InvoiceAddress InvoiceAddress{ get; set; }
+    public ShippingAddress ShippingAddress { get; set; }
+    public InvoiceAddress InvoiceAddress { get; set; }
 
 
     /// <summary>
@@ -118,16 +118,18 @@ public record OrderState : AggregateState<OrderState, OrderId>
 
         //from order.AddOrderRow
         On<OrderEvents.V1.OrderRowAdded>(HandleOrderRowAdded);
+        On<OrderEvents.V1.OrderRowAmountChanged>(HandleOrderRowAmountChanged);
+        On<OrderEvents.V1.OrderRowDeleted>(HandleOrderRowOrderRowDeleted);
 
         //from order.RecordPayment
         On<OrderEvents.V1.PaymentRecorded>(HandlePayment);
 
         //from order.RecordPayment / MarkFullyPaidIfNecessary
-        On<OrderEvents.V1.OrderFullyPaid>((state, paid) => 
+        On<OrderEvents.V1.OrderFullyPaid>((state, paid) =>
             state with { Paid = true });
     }
 
-   
+
 
     /* a note on records "with"
      * 'record with' will "modify" the props set here,
@@ -155,7 +157,7 @@ public record OrderState : AggregateState<OrderState, OrderId>
             Outstanding = new Money(booked.OutstandingAmount, booked.Currency),
             Discount = new Money(booked.DiscountAmount, booked.Currency),
             OrderBookedDate = booked.OrderBookedDate,
-            
+
             // Note: payment if direct should be set before Booking allowed, thus no need to 
             //Paid = Outstanding.Amount == 0, 
             //todo: shipping address
@@ -204,6 +206,32 @@ public record OrderState : AggregateState<OrderState, OrderId>
         };
     }
 
+    private OrderState HandleOrderRowOrderRowDeleted(OrderState state, OrderEvents.V1.OrderRowDeleted deleted)
+    {
+        return state with
+        {
+            OrderRows = state.OrderRows.RemoveAll(row => row.Id == deleted.OrderRowId)
+        };
+    }
+    private OrderState HandleOrderRowAmountChanged(OrderState state, OrderEvents.V1.OrderRowAmountChanged changed)
+    {
+        var rowToUpdate = state.OrderRows
+                .First(row => row.Id == changed.OrderRowId) 
+            with { Amount = changed.ProductAmount };
+        
+        //rowToUpdate = rowToUpdate with
+        //{
+        //    Amount = changed.ProductAmount
+        //};
+
+        return state with
+        {
+            OrderRows = state.OrderRows
+                .RemoveAll(row => row.Id == changed.OrderRowId)
+                .Add(rowToUpdate)
+        };
+    }
+
 
     private OrderState HandlePayment(OrderState state, OrderEvents.V1.PaymentRecorded payment)
     {
@@ -216,5 +244,5 @@ public record OrderState : AggregateState<OrderState, OrderId>
         };
     }
 
-    
+
 }

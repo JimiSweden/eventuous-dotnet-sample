@@ -84,6 +84,25 @@ namespace Orders.Application
                     DateTimeOffset.Now
                 )
             );
+
+            OnExistingAsync<OrderCommands.DeleteOrderRow>(
+                cmd => new OrderId(cmd.OrderId),
+                (order, cmd, _) => order.DeleteOrderRow(
+                    cmd.OrderId,
+                    cmd.OrderRowId,
+                    cmd.ProductId
+                )
+            );
+
+            OnExistingAsync<OrderCommands.UpdateOrderRowAmount>(
+                cmd => new OrderId(cmd.OrderId),
+                (order, cmd, _) => order.UpdateOrderRowAmount(
+                    cmd.OrderId,
+                    cmd.OrderRowId,
+                    cmd.ProductAmount
+                )
+            );
+
         }
     }
     

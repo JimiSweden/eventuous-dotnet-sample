@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "README", "README", "{DE67D8
 	ProjectSection(SolutionItems) = preProject
 		README EventStore how to install run and getting started.md = README EventStore how to install run and getting started.md
 		README.md = README.md
+		README resources tips n tricks.md = README resources tips n tricks.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FACB1907-3348-4E65-9636-C3ED93529FCC}"
@@ -20,9 +21,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orders.Domain", "Orders.Domain\Orders.Domain.csproj", "{6B533E5A-66F4-4ADE-86A2-DB36C3E60B5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orders.Domain", "Orders.Domain\Orders.Domain.csproj", "{6B533E5A-66F4-4ADE-86A2-DB36C3E60B5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orders", "Orders\Orders.csproj", "{E89097B8-F217-44E0-BE8A-5172D01A96B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orders", "Orders\Orders.csproj", "{E89097B8-F217-44E0-BE8A-5172D01A96B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
