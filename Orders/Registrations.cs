@@ -52,7 +52,17 @@ namespace Orders;
         //services.AddSingleton<Services.ConvertCurrency>((from, currency) => new Money(from.Amount * 2, currency));
 
 
-        //AllStreamSubscription is a Catch-up subscription for EventStoreDB, using the $all global stream
+        //enable mongo db for projections.. (read models)
+        services.AddSingleton(Mongo.ConfigureMongo(configuration));
+
+        services.AddCheckpointStore<MongoCheckpointStore>(); //eventuous extension
+
+        ///* subscriptions below are "listening" to  EventStoreDB $all global stream
+        // * and updates the MongoDb projection views (read models) 
+        // */
+
+
+        ////AllStreamSubscription is a Catch-up subscription for EventStoreDB, using the $all global stream
         services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
             "OrdersProjections",
             builder => builder
@@ -63,15 +73,6 @@ namespace Orders;
         );
 
 
-
-        //todo: enable mongo db for projections.. 
-        //services.AddSingleton(Mongo.ConfigureMongo(configuration)); 
-
-        //services.AddCheckpointStore<MongoCheckpointStore>(); //eventuous extension
-
-        /* subscriptions below are "listening" to  EventStoreDB $all global stream
-         * and updates the MongoDb projection views (read models) 
-         */
         //AllStreamSubscription is a Catch-up subscription for EventStoreDB, using the $all global stream
         //services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
         //    "BookingsProjections",
