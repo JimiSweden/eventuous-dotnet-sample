@@ -99,6 +99,7 @@ namespace Orders.Application.Queries
         private UpdateDefinition<OrderDocument> HandleOrderBooked(OrderEvents.V1.OrderBooked evt, UpdateDefinitionBuilder<OrderDocument> update)
             => update.Set(x => x.Booked, true)
                 .Set(x => x.OrderBookedDate, evt.OrderBookedDate)
+                .Set(x => x.Paid, evt.OutstandingAmount == 0)
                 .Set(x => x.Price, evt.OrderPrice)
                 .Set(x => x.Currency, evt.Currency)
                 .Set(x => x.Outstanding, evt.OutstandingAmount)
