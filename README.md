@@ -1,3 +1,9 @@
+# Learn Event Sourcing with Eventuous and Event Modeling
+Event Model (System Blueprint example) https://miro.com/app/board/o9J_lrFQov0=/
+- also contains explanations and screendumps for this code base. "A logical overview in pictures"
+> note: look for the Frame "Order processing Template" and the connected frames.
+
+
 ## EvenStore.
 see 'README EventStore how to install run and getting started.md'
 

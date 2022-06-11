@@ -158,7 +158,8 @@ namespace Orders.Domain.Orders
         {
             EnsureExists();
 
-            if (!State.Booked)
+            // todo? perhaps change logic of processing? Cancel possible for booked? or just request cancel?
+            if (!State.Booked) 
             {
                 throw new DomainException("Order is not Booked yet and thus can't be cancelled");
             }
