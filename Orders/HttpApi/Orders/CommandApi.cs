@@ -99,5 +99,25 @@ namespace Orders.HttpApi.Orders
             CancellationToken cancellationToken
         ) => Handle(cmd, cancellationToken);
 
+
+        [HttpPost]
+        [Route("address/invoice/add")]
+        public Task<ActionResult<Result>> AddInvoiceAddress(
+            [FromBody] OrderCommands.AddInvoiceAddress cmd,
+            CancellationToken cancellationToken)
+            => Handle(cmd, cancellationToken);
+
+        [HttpPost]
+        [Route("address/shipping/add")]
+        public Task<ActionResult<Result>> AddShippingAddress(
+            [FromBody] OrderCommands.AddShippingAddress cmd,
+            CancellationToken cancellationToken)
+            => Handle(cmd, cancellationToken);[HttpPost]
+        
+        [Route("address/shipping/remove")]
+        public Task<ActionResult<Result>> RemoveShippingAddress(
+            [FromBody] OrderCommands.RemoveShippingAddress cmd,
+            CancellationToken cancellationToken)
+            => Handle(cmd, cancellationToken);
     }
 }

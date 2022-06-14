@@ -88,7 +88,6 @@ namespace Orders.Application
             OnExistingAsync<OrderCommands.DeleteOrderRow>(
                 cmd => new OrderId(cmd.OrderId),
                 (order, cmd, _) => order.DeleteOrderRow(
-                    cmd.OrderId,
                     cmd.OrderRowId,
                     cmd.ProductId
                 )
@@ -97,10 +96,46 @@ namespace Orders.Application
             OnExistingAsync<OrderCommands.UpdateOrderRowAmount>(
                 cmd => new OrderId(cmd.OrderId),
                 (order, cmd, _) => order.UpdateOrderRowAmount(
-                    cmd.OrderId,
                     cmd.OrderRowId,
                     cmd.ProductAmount
                 )
+            );
+
+            OnExistingAsync<OrderCommands.AddInvoiceAddress>(
+                cmd => new OrderId(cmd.OrderId),
+                (order, cmd, _) => order.AddInvoiceAddress(
+                    cmd.Name,
+                    cmd.CompanyName,
+                    cmd.PhoneNumber,
+                    cmd.EmailAddress,
+                    cmd.StreetName,
+                    cmd.StreetNumber,
+                    cmd.ApartmentOrOfficeInfo,
+                    cmd.Postcode,
+                    cmd.PostTown,
+                    cmd.Country
+                )
+            );
+
+            OnExistingAsync<OrderCommands.AddShippingAddress>(
+                cmd => new OrderId(cmd.OrderId),
+                (order, cmd, _) => order.AddShippingAddress(
+                    cmd.Name,
+                    cmd.CompanyName,
+                    cmd.PhoneNumber,
+                    cmd.EmailAddress,
+                    cmd.StreetName,
+                    cmd.StreetNumber,
+                    cmd.ApartmentOrOfficeInfo,
+                    cmd.Postcode,
+                    cmd.PostTown,
+                    cmd.Country,
+                    cmd.IsResidential
+                )
+            );
+            OnExistingAsync<OrderCommands.RemoveShippingAddress>(
+                cmd => new OrderId(cmd.OrderId),
+                (order, cmd, _) => order.RemoveShippingAddress()
             );
 
         }

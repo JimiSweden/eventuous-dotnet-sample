@@ -85,5 +85,41 @@ namespace Orders.Application
             int ProductAmount
         );
 
+        public record AddInvoiceAddress(
+            string OrderId,
+            string Name,
+            string CompanyName,
+            string PhoneNumber,
+            string EmailAddress,
+            string StreetName,
+            string StreetNumber,
+            string ApartmentOrOfficeInfo, //floor, apartment number, etc.
+            string Postcode,
+            string PostTown,
+            string Country
+            )
+        {
+            
+        }
+
+
+        public record AddShippingAddress(
+            string OrderId,
+            string Name,
+            string CompanyName,
+            string PhoneNumber,
+            string EmailAddress,
+            string StreetName,
+            string StreetNumber,
+            string ApartmentOrOfficeInfo, //floor, apartment number, etc.
+            string Postcode,
+            string PostTown,
+            string Country,
+            bool? IsResidential
+        );
+
+        public record RemoveShippingAddress(
+            string OrderId);
+
     }
 }

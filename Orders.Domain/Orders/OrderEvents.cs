@@ -98,6 +98,42 @@ namespace Orders.Domain.Orders
                 string UnBookedBy,
                 DateTimeOffset OrderUnBookedAt
             );
+
+            //https://en.wikipedia.org/wiki/Address#Format_by_country_and_area
+            [EventType("V1.InvoiceAddressAdded")]
+            public record InvoiceAddressAdded(
+                OrderId OrderId,
+                string Name,
+                string Company,
+                string PhoneNumber,
+                string EmailAddress,
+                string StreetName,
+                string StreetNumber,
+                string ApartmentOrOfficeInfo, //floor, apartment number, etc.
+                string Postcode,
+                string PostTown,
+                string Country
+            );
+
+            [EventType("V1.ShippingAddressAdded")]
+            public record ShippingAddressAdded(
+                OrderId OrderId,
+                string Name,
+                string Company,
+                string PhoneNumber,
+                string EmailAddress,
+                string StreetName,
+                string StreetNumber,
+                string ApartmentOrOfficeInfo, //floor, apartment number, etc.
+                string Postcode,
+                string PostTown,
+                string Country, 
+                bool? IsResidential
+                );
+
+            
+            [EventType("V1.ShippingAddressRemoved")]
+            public record ShippingAddressRemoved(OrderId OrderId);
         }
 
     }

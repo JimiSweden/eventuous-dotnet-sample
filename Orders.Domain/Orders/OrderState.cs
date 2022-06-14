@@ -30,6 +30,18 @@ public record OrderState : AggregateState<OrderState, OrderId>
     //public OrderId Id { get; set; }
     public string CustomerId { get; set; }
 
+    //TODO: Invoice- , Shipping Address and Delivery options
+    public bool ShipToInvoiceAddress => ShippingAddress == default;
+
+    /// <summary>
+    /// should be connected to customer details
+    /// todo? add 'Notes', i.e. mottagare, portkod etc. 
+    /// </summary>
+    public Address InvoiceAddress { get; set; }
+
+    public Address ShippingAddress { get; set; }
+
+
     public Money Price { get; init; }
     public Money Outstanding { get; init; }
     public Money Discount { get; init; }
@@ -91,10 +103,7 @@ public record OrderState : AggregateState<OrderState, OrderId>
     /// <returns></returns>
     internal bool HasPaymentBeenRecorded(string paymentId) => PaymentRecords.Any(x => x.PaymentId == paymentId);
 
-    //TODO: Invoice- , Shipping Address and Delivery options
-    // bool ShipToCustomerAddress, || ShippingAddress
-    public ShippingAddress ShippingAddress { get; set; }
-    public InvoiceAddress InvoiceAddress { get; set; }
+    
 
 
     /// <summary>
@@ -121,6 +130,12 @@ public record OrderState : AggregateState<OrderState, OrderId>
         On<OrderEvents.V1.OrderRowAmountChanged>(HandleOrderRowAmountChanged);
         On<OrderEvents.V1.OrderRowDeleted>(HandleOrderRowOrderRowDeleted);
 
+
+        On<OrderEvents.V1.InvoiceAddressAdded>(HandleInvoiceAddressAdded);
+        On<OrderEvents.V1.ShippingAddressAdded>(HandleShippingAddressAdded);
+        On<OrderEvents.V1.ShippingAddressRemoved>(HandleShippingAddressRemoved);
+
+
         //from order.RecordPayment
         On<OrderEvents.V1.PaymentRecorded>(HandlePayment);
 
@@ -129,6 +144,52 @@ public record OrderState : AggregateState<OrderState, OrderId>
             state with { Paid = true });
     }
 
+    private OrderState HandleShippingAddressRemoved(OrderState state, OrderEvents.V1.ShippingAddressRemoved evt)
+    {
+        return state with
+        {
+            ShippingAddress = default
+        };
+    }
+
+    private OrderState HandleShippingAddressAdded(OrderState state, OrderEvents.V1.ShippingAddressAdded address)
+    {
+        return state with
+        {
+            ShippingAddress = new Address(
+                address.Name,
+                address.Company,
+                address.PhoneNumber,
+                address.EmailAddress,
+                address.StreetName,
+                address.StreetNumber,
+                address.ApartmentOrOfficeInfo,
+                address.Postcode,
+                address.PostTown,
+                address.Country,
+                address.IsResidential
+            )
+        };
+    }
+
+    private OrderState HandleInvoiceAddressAdded(OrderState state, OrderEvents.V1.InvoiceAddressAdded address)
+    {
+        return state with
+        {
+            InvoiceAddress = new Address(
+                address.Name,
+                address.Company,
+                address.PhoneNumber,
+                address.EmailAddress,
+                address.StreetName,
+                address.StreetNumber,
+                address.ApartmentOrOfficeInfo,
+                address.Postcode,
+                address.PostTown,
+                address.Country
+            )
+        };
+    }
 
 
     /* a note on records "with"

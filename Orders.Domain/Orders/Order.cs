@@ -69,9 +69,18 @@ namespace Orders.Domain.Orders
                 Debugger.Break();
                 throw;
             }
-            
+
         }
 
+
+        /// <summary>
+        /// todo: validate
+        ///  [ ]  -perhaps..? should not have requirement invoice address? could be gift or something
+        /// *  [x ] that the order has orderRows
+        /// *  [ ] order is either payed or customer is allowed to be invoiced
+        /// *   ex: - not paid and invoicing not allowed,
+        /// *        - or not paid and customer outstanding total exceeds credit limit
+        /// </summary>
         public async Task BookOrder(
             Money price,
             Money prepaid,
@@ -95,13 +104,19 @@ namespace Orders.Domain.Orders
                 throw new DomainException("Order is already Booked");
             }
 
-            /* todo: validate
-             *  [ ] that the order has orderRows
-             *  [ ] order is either payed or customer is allowed to be invoiced
-             *   ex: - not paid and invoicing not allowed,
-        *        - or not paid and customer outstanding total exceeds credit limit
-             *
-             */
+            if (State.OrderRows.IsEmpty)
+            {
+                throw new DomainException("Order is missing order rows; and therefore can't be Booked");
+            }
+
+            // todo ? -perhaps.. ? should not have requirement invoice address? could be gift or something
+            var dateOfAddingRestrictionToAddress = "2022-06-14";
+            if (State.InvoiceAddress == default && State.OrderCreatedDate >= DateTimeOffset.Parse(dateOfAddingRestrictionToAddress))
+            {
+                throw new DomainException("Order is missing invoice address; and therefore can't be Booked");
+            }
+
+            
 
             //from the Eventuous base class 'Aggregate'
             // will AddChange to internal list of pending changes,
@@ -256,7 +271,7 @@ namespace Orders.Domain.Orders
         }
 
 
-        public async Task DeleteOrderRow(string orderId, string orderRowId, string productId)
+        public async Task DeleteOrderRow(string orderRowId, string productId)
         {
             EnsureExists();
 
@@ -277,10 +292,10 @@ namespace Orders.Domain.Orders
                 throw new DomainException("cannot find order row with type/Id");
             }
 
-            Apply(new OrderEvents.V1.OrderRowDeleted(orderId, orderRowId, productId));
+            Apply(new OrderEvents.V1.OrderRowDeleted(State.Id, orderRowId, productId));
         }
 
-        public async Task UpdateOrderRowAmount(string orderId, string orderRowId, int productAmount)
+        public async Task UpdateOrderRowAmount(string orderRowId, int productAmount)
         {
             EnsureExists();
 
@@ -301,7 +316,7 @@ namespace Orders.Domain.Orders
                 throw new DomainException("cannot find order row with type/Id");
             }
 
-            Apply(new OrderEvents.V1.OrderRowAmountChanged(orderId, orderRowId, productAmount));
+            Apply(new OrderEvents.V1.OrderRowAmountChanged(State.Id, orderRowId, productAmount));
         }
 
 
@@ -348,6 +363,78 @@ namespace Orders.Domain.Orders
             Apply(new OrderEvents.V1.OrderFullyPaid(State.Id, when));
         }
 
-        
+
+        public async Task AddInvoiceAddress(
+            string name,
+            string companyName,
+            string phoneNumber,
+            string emailAddress,
+            string streetName,
+            string streetNumber,
+            string apartmentOrOfficeInfo, //floor, apartment number, etc.
+            string postcode,
+            string postTown,
+            string country)
+        {
+
+            EnsureExists();
+
+            Apply(new OrderEvents.V1.InvoiceAddressAdded(
+                    State.Id,
+                    name,
+                    companyName,
+                    phoneNumber,
+                    emailAddress,
+                    streetName,
+                    streetNumber,
+                    apartmentOrOfficeInfo,
+                    postcode,
+                    postTown,
+                    country
+                    )
+            );
+        }
+
+        public async Task AddShippingAddress(
+            string name,
+            string companyName,
+            string phoneNumber,
+            string emailAddress,
+            string streetName,
+            string streetNumber,
+            string apartmentOrOfficeInfo, //floor, apartment number, etc.
+            string postcode,
+            string postTown,
+            string country,
+            bool? isResidential)
+        {
+
+            EnsureExists();
+
+            Apply(new OrderEvents.V1.ShippingAddressAdded(
+                    State.Id,
+                    name,
+                    companyName,
+                    phoneNumber,
+                    emailAddress,
+                    streetName,
+                    streetNumber,
+                    apartmentOrOfficeInfo,
+                    postcode,
+                    postTown,
+                    country,
+                    isResidential
+                )
+            );
+        }
+
+        public async Task RemoveShippingAddress()
+        {
+            EnsureExists();
+
+            if(State.ShippingAddress == default) return;
+
+            Apply(new OrderEvents.V1.ShippingAddressRemoved(State.Id));
+        }
     }
 }
