@@ -1,18 +1,20 @@
 # Learn Event Sourcing with Eventuous and Event Modeling
-Event Model (System Blueprint example) https://miro.com/app/board/o9J_lrFQov0=/
+Event Model (System Blueprint example) https://miro.com/app/board/o9J_lrFQov0=/?moveToWidget=3458764527760600530&cot=14 
 - also contains explanations and screendumps for this code base. "A logical overview in pictures"
 > note: look for the Frame "Order processing Template" and the connected frames.
 
 
-## EvenStore.
-see 'README EventStore how to install run and getting started.md'
+## EvenStoreDB
+see 'README EventStore how to install, run and getting started.md'
 
+## Resources for reading etc
+see 'README resources tips n tricks.md'
 
 ## Troubleshooting -
 If you app doesnt start >> 
 
 ## Important note! if the project doesn't start
-- ensure the EventsoreClient connection string is corect, and ES is running.
+- ensure the EventsoreClient connection string is corect, and EventStoreDB is running.
 - ensure mongodb...
 
 I had a problem with visual studio 2022, installed with dotnet 6.0

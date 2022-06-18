@@ -19,9 +19,8 @@ namespace Orders.Application
         public OrdersCommandService(IAggregateStore store) : base(store)
         {
             /* A note on the params to Async methods.
-             * the third param '_' is needed if we don't pass anything
-             * since ActOnAggregateAsync takes 3 params
-             * (cancellationToken is the last param)
+             * the third param '_' is the cancellation token
+             * (ActOnAggregateAsync takes 3 params)
              */
 
             OnNewAsync<OrderCommands.AddOrder>(
