@@ -23,12 +23,14 @@ public static class Registrations {
     public static void AddEventuous(this IServiceCollection services, IConfiguration configuration) {
         DefaultEventSerializer.SetDefaultSerializer(
             new DefaultEventSerializer(
-                new JsonSerializerOptions(JsonSerializerDefaults.Web).ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
+                new JsonSerializerOptions(JsonSerializerDefaults.Web).ConfigureForNodaTime(
+                    DateTimeZoneProviders.Tzdb
+                )
             )
         );
 
         // See 'README how to run etc.md' for ESDB notes        
-        services.AddEventStoreClient(configuration["EventStore:ConnectionString"]);
+        services.AddEventStoreClient(configuration["EventStore:ConnectionString"]!);
         //Note: if you have login (default) on the Event store database, you need the user and password.
 //TODO.. efter merge, till config. 
                 //services.AddEventStoreClient("esdb://admin:changeit@localhost:2113?tls=true&tlsVerifyCert=false");
@@ -57,14 +59,15 @@ public static class Registrations {
         services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
             "BookingsProjections",
             builder => builder
-                .Configure(cfg => cfg.ConcurrencyLimit = 2)
+//.Configure(cfg => cfg.ConcurrencyLimit = 2)
+                .UseCheckpointStore<MongoCheckpointStore>()
                 .AddEventHandler<BookingStateProjection>()
                 .AddEventHandler<MyBookingsProjection>()
                 //TODO: add projection holding the available rooms and booked dates
                 .WithPartitioningByStream(2)
         );
-        
-        services.AddSubscription<StreamSubscription, StreamSubscriptionOptions>(
+
+        services.AddSubscription<StreamPersistentSubscription, StreamPersistentSubscriptionOptions>(
             "PaymentIntegration",
             builder => builder
                 .Configure(x => x.StreamName = PaymentsIntegrationHandler.Stream)
@@ -74,6 +77,7 @@ public static class Registrations {
 
     public static void AddOpenTelemetry(this IServiceCollection services) {
         var otelEnabled = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") != null;
+
         services.AddOpenTelemetryMetrics(
             builder => {
                 builder

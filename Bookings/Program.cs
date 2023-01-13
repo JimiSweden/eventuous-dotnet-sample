@@ -3,6 +3,8 @@ using Bookings.Domain.Bookings;
 using Eventuous;
 using Eventuous.AspNetCore;
 using Eventuous.Diagnostics.Logging;
+using Eventuous.Spyglass;
+using Microsoft.AspNetCore.Http.Json;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using Serilog;
@@ -11,7 +13,8 @@ using Serilog.Events;
 TypeMap.RegisterKnownEventTypes(typeof(BookingEvents.V1.RoomBooked).Assembly);
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
+    .MinimumLevel.Verbose()
+	//.MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .MinimumLevel.Override("Grpc", LogEventLevel.Information)
     .MinimumLevel.Override("Grpc.Net.Client.Internal.GrpcCall", LogEventLevel.Error)
@@ -31,6 +34,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddOpenTelemetry();
 builder.Services.AddEventuous(builder.Configuration);
+builder.Services.AddEventuousSpyglass();
+
+builder.Services.Configure<JsonOptions>(options
+    => options.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
+);
 
 var app = builder.Build();
 
@@ -39,6 +47,7 @@ app.AddEventuousLogs();
 app.UseSwagger().UseSwaggerUI();
 app.MapControllers();
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
+app.MapEventuousSpyglass(null);
 
 var factory  = app.Services.GetRequiredService<ILoggerFactory>();
 var listener = new LoggingEventListener(factory, "OpenTelemetry");
@@ -46,6 +55,7 @@ var listener = new LoggingEventListener(factory, "OpenTelemetry");
 try {
     app.Run();
     //app.Run("http://*:5003");
+    //app.Run("http://*:5051");
     return 0;
 }
 catch (Exception e) {

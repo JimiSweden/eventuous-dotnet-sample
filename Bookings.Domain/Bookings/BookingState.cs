@@ -1,26 +1,24 @@
 using System.Collections.Immutable;
 using Eventuous;
 using static Bookings.Domain.Bookings.BookingEvents;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable NotAccessedPositionalProperty.Global
 
 namespace Bookings.Domain.Bookings;
 
-/// <summary>
-/// BookingState is used to build the aggregate state from events <br/>
-/// record, instead of class, ensures Imutability. it is always 'newed'
-/// </summary>
-public record BookingState : AggregateState<BookingState, BookingId>
-{
-    public string GuestId { get; init; }
-    public RoomId RoomId { get; init; }
-    public StayPeriod Period { get; init; }
-    public Money Price { get; init; }
-    public Money Outstanding { get; init; }
-    public bool Paid { get; init; }
-
-    public ImmutableList<PaymentRecord> PaymentRecords { get; init; } = ImmutableList<PaymentRecord>.Empty;
-
-    internal bool HasPaymentBeenRecorded(string paymentId) => PaymentRecords.Any(x => x.PaymentId == paymentId);
-
+public record BookingState : State<BookingState> {
+    public string     GuestId     { get; init; } = null!;
+    public RoomId     RoomId      { get; init; } = null!;
+    public StayPeriod Period      { get; init; } = null!;
+    public Money      Price       { get; init; } = null!;
+    public Money      Outstanding { get; init; } = null!;
+    public bool       Paid        { get; init; }
+    
+    public ImmutableArray<PaymentRecord> Payments { get; init; } = ImmutableArray<PaymentRecord>.Empty;
+    
+    internal bool HasPaymentBeenRegistered(string paymentId) => Payments.Any(x => x.PaymentId == paymentId);
+    
     public BookingState() {
         On<V1.RoomBooked>(HandleBooked);
         On<V1.BookingChanged>(HandleBookingChanged);
@@ -32,14 +30,11 @@ public record BookingState : AggregateState<BookingState, BookingId>
         // 'record with' will "modify" the props set here, and use the current props as is from, in our case, our BookingState 'state' 
         => state with {
             Outstanding = new Money { Amount = e.Outstanding, Currency = e.Currency },
-            PaymentRecords = state.PaymentRecords.Add(
-                new PaymentRecord(e.PaymentId, new Money { Amount = e.PaidAmount, Currency = e.Currency })
-            )
+            Payments = state.Payments.Add(new PaymentRecord(e.PaymentId, new Money(e.PaidAmount, e.Currency)))
         };
 
     static BookingState HandleBooked(BookingState state, V1.RoomBooked booked)
         => state with {
-            Id = new BookingId(booked.BookingId),
             RoomId = new RoomId(booked.RoomId),
             Period = new StayPeriod(booked.CheckInDate, booked.CheckOutDate),
             GuestId = booked.GuestId,

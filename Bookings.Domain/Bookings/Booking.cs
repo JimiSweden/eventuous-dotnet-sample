@@ -7,10 +7,8 @@ namespace Bookings.Domain.Bookings;
 /// <summary>
 /// note that the actions/methods here needs to be handled in <see cref="Bookings.Application.BookingsCommandService"/>
 /// </summary>
-public class Booking : Aggregate<BookingState, BookingId>
-{
+public class Booking : Aggregate<BookingState> {
     public async Task BookRoom(
-        BookingId bookingId,
         string guestId,
         RoomId roomId,
         StayPeriod period,
@@ -39,18 +37,18 @@ public class Booking : Aggregate<BookingState, BookingId>
          *  it returns versions of the state before and after event is applied (but you probably don't need them)
          *  
         */
-
-        Apply(new V1.RoomBooked(
-            bookingId,
-            guestId,
-            roomId,
-            period.CheckIn,
-            period.CheckOut,
-            price.Amount,
-            prepaid.Amount,
-            outstanding.Amount,
-            price.Currency,
-            bookedAt
+        
+        Apply(
+            new V1.RoomBooked(
+                guestId,
+                roomId,
+                period.CheckIn,
+                period.CheckOut,
+                price.Amount,
+                prepaid.Amount,
+                outstanding.Amount,
+                price.Currency,
+                bookedAt
             )
         );
 
@@ -79,7 +77,7 @@ public class Booking : Aggregate<BookingState, BookingId>
         var outstanding = price - prepaid;
 
         Apply(new V1.BookingChanged(
-               State.Id, //bookingId,
+              // State.Id, //bookingId,
                roomId,
                period.CheckIn,
                period.CheckOut,
@@ -93,21 +91,19 @@ public class Booking : Aggregate<BookingState, BookingId>
     }
 
     public void RecordPayment(
-    Money paid,
-    string paymentId,
-    string paidBy,
-    DateTimeOffset paidAt
-)
-    {
+        Money paid,
+        string paymentId,
+        string paidBy,
+        DateTimeOffset paidAt
+    ) {
         EnsureExists();
 
-        if (State.HasPaymentBeenRecorded(paymentId)) return;
+        if (State.HasPaymentBeenRegistered(paymentId)) return;
 
         var outstanding = State.Outstanding - paid;
 
         Apply(
             new V1.PaymentRecorded(
-                State.Id,
                 paid.Amount,
                 outstanding.Amount,
                 paid.Currency,
@@ -118,13 +114,20 @@ public class Booking : Aggregate<BookingState, BookingId>
         );
 
         MarkFullyPaidIfNecessary(paidAt);
+        MarkOverpaid(paidAt);
     }
 
     void MarkFullyPaidIfNecessary(DateTimeOffset when)
     {
-        if (State.Outstanding.Amount != 0) return;
+        if (State.Outstanding.Amount > 0) return;
 
-        Apply(new V1.BookingFullyPaid(State.Id, when));
+        Apply(new V1.BookingFullyPaid(when));
+    }
+
+    void MarkOverpaid(DateTimeOffset when) {
+        if (State.Outstanding.Amount < 0) return;
+
+        Apply(new V1.BookingOverpaid(when));
     }
 
     static async Task EnsureRoomAvailable(RoomId roomId, StayPeriod period, IsRoomAvailable isRoomAvailable)
