@@ -124,7 +124,7 @@ public class Booking : Aggregate<BookingState> {
     }
 
     void MarkOverpaid(DateTimeOffset when) {
-        if (State.Outstanding.Amount < 0) return;
+        if (State.Outstanding.Amount >= 0) return;
 
         Apply(new V1.BookingOverpaid(when));
     }
