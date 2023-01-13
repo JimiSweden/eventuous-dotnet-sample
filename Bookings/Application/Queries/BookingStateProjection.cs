@@ -16,8 +16,7 @@ public class BookingStateProjection : MongoProjection<BookingDocument> {
     public BookingStateProjection(IMongoDatabase database) : base(database) {
         On<V1.RoomBooked>(stream => stream.GetId(), HandleRoomBooked);
 
-//TODO: stream.GetId() enligt ovan,         
-On<V1.BookingChanged>(evt => evt.BookingId, HandleBookingChanged);
+        On<V1.BookingChanged>(stream => stream.GetId(), HandleBookingChanged);
 
         On<V1.PaymentRecorded>(
             b => b
@@ -50,13 +49,17 @@ On<V1.BookingChanged>(evt => evt.BookingId, HandleBookingChanged);
 	}
 
     static UpdateDefinition<BookingDocument> HandleBookingChanged(
-        V1.BookingChanged evt, UpdateDefinitionBuilder<BookingDocument> update
+        IMessageConsumeContext<V1.BookingChanged> ctx, UpdateDefinitionBuilder<BookingDocument> update
     )
-        => update.Set(x => x.RoomId, evt.RoomId)
+    {
+        var evt = ctx.Message;
+
+        return update.Set(x => x.RoomId, evt.RoomId)
             .Set(x => x.CheckInDate, evt.CheckInDate)
             .Set(x => x.CheckOutDate, evt.CheckOutDate)
             .Set(x => x.BookingPrice, evt.BookingPrice)
             .Set(x => x.Outstanding, evt.OutstandingAmount);
-    
+    }
+
 
 }

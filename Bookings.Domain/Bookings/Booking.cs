@@ -77,7 +77,6 @@ public class Booking : Aggregate<BookingState> {
         var outstanding = price - prepaid;
 
         Apply(new V1.BookingChanged(
-              // State.Id, //bookingId,
                roomId,
                period.CheckIn,
                period.CheckOut,

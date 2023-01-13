@@ -21,7 +21,6 @@ public static class BookingEvents {
         //todo? RoomChanged + StayPeriod changed ? 
         [EventType("V1.BookingChanged")]
         public record BookingChanged(
-            string BookingId,            
             string RoomId,
             LocalDate CheckInDate,
             LocalDate CheckOutDate,
