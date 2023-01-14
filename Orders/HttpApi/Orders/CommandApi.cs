@@ -77,7 +77,7 @@ namespace Orders.HttpApi.Orders
             => Handle(cmd, cancellationToken);
 
         [HttpPost]
-        [Route("row/delete")]
+        [Route("row/remove")]
         public Task<ActionResult<Result>> DeleteOrderRow(
             [FromBody] OrderCommands.DeleteOrderRow cmd,
             CancellationToken cancellationToken)

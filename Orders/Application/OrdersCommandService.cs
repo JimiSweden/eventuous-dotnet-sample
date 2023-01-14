@@ -19,7 +19,7 @@ namespace Orders.Application
         public OrdersCommandService(IAggregateStore store) : base(store)
         {
             /* A note on the params to Async methods.
-             * the third param '_' is the cancellation token
+             * the third param '_' is the cancellation token and we don't use it in our order aggregate
              * (ActOnAggregateAsync takes 3 params)
              */
 
