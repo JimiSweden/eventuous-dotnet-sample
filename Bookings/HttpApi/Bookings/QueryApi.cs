@@ -73,4 +73,18 @@ public class QueryApi : ControllerBase {
         var allGuestsMyBookings = await _mongoDb.LoadDocuments<MyBookings>(guestIds,cancellationToken);
         return allGuestsMyBookings;
     }
+    /// <summary>
+    /// get guest ids for anyone who has ever booked a room
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("Statistics/AllGuestIds")]
+
+    public async Task<IEnumerable<string>> GetGuestIdsForThoseWhoHasEverBooked(CancellationToken cancellationToken)
+    {
+        //using extension in Eventuous.Projections.MongoDB.Tools
+        var allGuestsMyBookings = await _mongoDb.LoadDocument<StatisticsOfBookingsDocument>("statistics", cancellationToken);
+        return allGuestsMyBookings.Guests.Select(x => x.GuestId).ToList();
+    }
 }

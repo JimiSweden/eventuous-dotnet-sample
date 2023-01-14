@@ -63,6 +63,7 @@ public static class Registrations {
                 .UseCheckpointStore<MongoCheckpointStore>()
                 .AddEventHandler<BookingStateProjection>()
                 .AddEventHandler<MyBookingsProjection>()
+                .AddEventHandler<StatisticsOfBookingsProjection>()
                 //TODO: add projection holding the available rooms and booked dates
                 .WithPartitioningByStream(2)
         );
