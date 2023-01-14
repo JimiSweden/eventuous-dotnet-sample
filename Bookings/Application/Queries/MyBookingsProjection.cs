@@ -4,7 +4,6 @@ using static Bookings.Domain.Bookings.BookingEvents;
 
 namespace Bookings.Application.Queries;
 
-
 /// <summary>
 /// This updates the projection holding "MyBookings" in MongoDb <br/>
 /// - adds the new booking from the RoomBoked event to the current Guests list of Bookings <br/>

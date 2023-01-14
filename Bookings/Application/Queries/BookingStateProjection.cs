@@ -8,7 +8,7 @@ using static Bookings.Domain.Bookings.BookingEvents;
 namespace Bookings.Application.Queries;
 
 /// <summary>
-/// This is used to update the pojection BookingDocument, in MongoDb, 
+/// This is used to update the projection BookingDocument, in MongoDb, 
 /// it gets the data from the event-store
 /// 
 /// </summary>

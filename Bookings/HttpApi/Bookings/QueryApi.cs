@@ -1,4 +1,5 @@
 
+using System.Diagnostics;
 using Bookings.Application.Queries;
 using Bookings.Domain.Bookings;
 using Eventuous;
@@ -39,6 +40,28 @@ public class QueryApi : ControllerBase {
     }
 
     /// <summary>
+    /// all Bookings
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet]
+    //[Route("all")]
+
+    public async Task<IEnumerable<BookingDocument>> GetAllBookings(CancellationToken cancellationToken)
+    {
+        //using mongo db
+        var collection = _mongoDb.GetCollection<BookingDocument>("Booking");
+        if (collection == null)
+        {
+            Debugger.Break();
+        }
+        var gustBookings = await collection.Find(_ => true).ToListAsync(cancellationToken);
+
+        return gustBookings;
+
+    }
+
+    /// <summary>
     /// Get MyBookings-projection from MongoDb for a single guest/user.
     /// </summary>
     /// <param name="guestId"></param>
@@ -46,33 +69,48 @@ public class QueryApi : ControllerBase {
     /// <returns></returns>
     [HttpGet]
     [Route("guest/{guestId}")]
-    public async Task<MyBookings> GetBookings(string guestId, CancellationToken cancellationToken)
+    public async Task<MyBookings> GetMyBookings(string guestId, CancellationToken cancellationToken)
     {
         //using mongo db
         var collection = _mongoDb.GetCollection<MyBookings>("MyBookings");
-        var gustBookings = await collection.Find(x => x.Id == guestId).FirstOrDefaultAsync();
+        if (collection == null)
+        {
+            Debugger.Break();
+        }
+        var gustBookings = await collection.Find(x => x.Id == guestId).FirstOrDefaultAsync(cancellationToken);
 
         //using extension in Eventuous.Projections.MongoDB.Tools
         var myBookingsForGuest = await _mongoDb.LoadDocument<MyBookings>(guestId, cancellationToken);
         return myBookingsForGuest;
     }
+
     /// <summary>
     /// Get all guests MyBookings-projection from collection in mongoDb
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<IEnumerable<MyBookings>> GetAllBookings(CancellationToken cancellationToken)
+    [Route("GroupedByGuest")]
+
+    public async Task<IEnumerable<MyBookings>> GetAllBookingsGroupedByGuest(CancellationToken cancellationToken)
     {
         //using mongo db
         var collection = _mongoDb.GetCollection<MyBookings>("MyBookings");
-        var gustBookings = await collection.Find(_ => true).ToListAsync();
+        if (collection == null)
+        {
+            Debugger.Break();
+        }
+        var gustBookings = await collection.Find(_ => true).ToListAsync(cancellationToken);
 
-        var guestIds = new string[] {"jimi@lee"};
+        //NOTE: if using mongoDb without the extensino below, we don't need guestIds.
+        // this is a playground, comparing alternatives, it would be better to just return gustBookings here.
+
+        var guestIds = await GetGuestIdsForThoseWhoHasEverBooked(cancellationToken);
         //using extension in Eventuous.Projections.MongoDB.Tools
         var allGuestsMyBookings = await _mongoDb.LoadDocuments<MyBookings>(guestIds,cancellationToken);
         return allGuestsMyBookings;
     }
+
     /// <summary>
     /// get guest ids for anyone who has ever booked a room
     /// </summary>
