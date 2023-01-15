@@ -40,6 +40,35 @@ builder.Services.Configure<JsonOptions>(options
     => options.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
 );
 
+/* It's important to note that the UseCors invocation must be placed between UseRouting and UseEndpoints invocations if they are present.*/
+//builder.Services.AddCors(options =>
+//    options.AddDefaultPolicy(policy =>
+//        policy.WithOrigins("*").AllowAnyHeader().AllowAnyHeader())
+//);
+
+//alternative, with policy name and specified origins
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowCorsPolicyName",
+        builder =>
+        {
+            builder
+                .WithOrigins(
+                    "http://localhost:4200"
+                    //,
+                    //"http://localhost:5174",
+                    //"https://*.example.com"
+
+                )
+                .SetIsOriginAllowedToAllowWildcardSubdomains()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
+
+
+
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
@@ -48,6 +77,10 @@ app.UseSwagger().UseSwaggerUI();
 app.MapControllers();
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.MapEventuousSpyglass(null);
+
+
+// With endpoint routing, the CORS middleware must be configured to execute between the calls to UseRouting and UseEndpoints.
+app.UseCors("AllowCorsPolicyName");
 
 var factory  = app.Services.GetRequiredService<ILoggerFactory>();
 var listener = new LoggingEventListener(factory, "OpenTelemetry");
