@@ -19,7 +19,7 @@ public static class BookingCommands {
         DateTime CheckInDate,
         DateTime CheckOutDate,
         float BookingPrice,
-        float PrepaidAmount,
+        float PrepaidAmount, //todo: remove? 
         string Currency, //currency and price are bound, they are "Money"
         DateTimeOffset BookingDate
     );

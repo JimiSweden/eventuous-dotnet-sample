@@ -11,6 +11,12 @@ namespace Bookings.HttpApi.Bookings;
 public class CommandApi : CommandHttpApiBase<Booking> {
     public CommandApi(IApplicationService<Booking> service) : base(service) { }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="cmd"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>BookingState</returns>
     [HttpPost]
     [Route("book")]
     public Task<ActionResult<Result>> BookRoom([FromBody] BookRoom cmd, CancellationToken cancellationToken)
