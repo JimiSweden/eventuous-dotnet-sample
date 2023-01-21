@@ -3,6 +3,11 @@ using NodaTime;
 
 namespace Bookings.Domain.Bookings;
 
+/// <summary>
+/// Note that Events don't need an Id,
+/// f ex BookingId as in the context of the BookingState and matching the event stream Id
+/// (BookingId == stream Id)
+/// </summary>
 public static class BookingEvents {
     public static class V1 {
         [EventType("V1.RoomBooked")] // https://eventuous.dev/docs/persistence/serialisation/#auto-registration-of-types

@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "README", "README", "{DE67D865-22CF-4C0A-A188-0D00811AF8C8}"
 	ProjectSection(SolutionItems) = preProject
 		README EventStore how to install run and getting started.md = README EventStore how to install run and getting started.md
+		README resources tips n tricks.md = README resources tips n tricks.md
 		README.md = README.md
 	EndProjectSection
 EndProject

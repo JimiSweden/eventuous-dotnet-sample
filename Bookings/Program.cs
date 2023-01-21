@@ -5,10 +5,12 @@ using Eventuous.AspNetCore;
 using Eventuous.Diagnostics.Logging;
 using Eventuous.Spyglass;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.OpenApi.Models;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using Serilog;
 using Serilog.Events;
+using System.Reflection;
 
 TypeMap.RegisterKnownEventTypes(typeof(BookingEvents.V1.RoomBooked).Assembly);
 
@@ -31,7 +33,31 @@ builder.Services
     .AddControllers()
     .AddJsonOptions(cfg => cfg.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb));
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    //https://learn.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-7.0&tabs=visual-studio
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "Bookings API",
+        Description = "An ASP.NET Core Web API for managing Bookings ",
+        //TermsOfService = new Uri("https://example.com/terms"),
+        //Contact = new OpenApiContact
+        //{
+        //    Name = "Example Contact",
+        //    Url = new Uri("https://example.com/contact")
+        //},
+        //License = new OpenApiLicense
+        //{
+        //    Name = "Example License",
+        //    Url = new Uri("https://example.com/license")
+        //}
+    });
+
+    // using System.Reflection;
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 builder.Services.AddOpenTelemetry();
 builder.Services.AddEventuous(builder.Configuration);
 builder.Services.AddEventuousSpyglass();

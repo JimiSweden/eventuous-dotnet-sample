@@ -3,6 +3,7 @@
 	
 	<PropertyGroup>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
     <ItemGroup>
         <!--note: "EventuousVersion" is set in Directory.Build.props -->

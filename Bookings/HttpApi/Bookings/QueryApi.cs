@@ -26,7 +26,7 @@ public class QueryApi : ControllerBase {
     }
 
     /// <summary>
-    /// Get a booking from Eventstore
+    /// Get a booking (BookingState) from EventStoreDB
     /// </summary>
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
@@ -40,7 +40,7 @@ public class QueryApi : ControllerBase {
     }
 
     /// <summary>
-    /// all Bookings
+    /// all Bookings-projections (from MongoDb)
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
@@ -62,7 +62,7 @@ public class QueryApi : ControllerBase {
     }
 
     /// <summary>
-    /// Get MyBookings-projection from MongoDb for a single guest/user.
+    /// Get MyBookings-projection (from MongoDb) for a single guest/user.
     /// </summary>
     /// <param name="guestId"></param>
     /// <param name="cancellationToken"></param>
@@ -85,7 +85,7 @@ public class QueryApi : ControllerBase {
     }
 
     /// <summary>
-    /// Get all guests MyBookings-projection from collection in mongoDb
+    /// Get all guests MyBookings-projection (from MongoDB)
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
@@ -112,7 +112,7 @@ public class QueryApi : ControllerBase {
     }
 
     /// <summary>
-    /// get guest ids for anyone who has ever booked a room
+    /// Get guest ids for anyone who has ever booked a room (from MongoDB StatisticsOfBookingsDocument-projection)
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
