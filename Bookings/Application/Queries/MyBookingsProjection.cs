@@ -1,10 +1,10 @@
 using Eventuous.Projections.MongoDB;
-using Eventuous.Subscriptions.Context;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using static Bookings.Domain.Bookings.BookingEvents;
+using Eventuous.Subscriptions.Context;
 
 namespace Bookings.Application.Queries;
+
 
 /// <summary>
 /// This updates the projection holding "MyBookings" in MongoDb <br/>
@@ -15,6 +15,7 @@ public class MyBookingsProjection : MongoProjection<MyBookings>
 {
     public MyBookingsProjection(IMongoDatabase database) : base(database)
     {
+        //_hubContext = hubContext;
         //Adds a Booking to the array of Bookings
         On<V1.RoomBooked>(b => b
             .UpdateOne
@@ -37,6 +38,7 @@ public class MyBookingsProjection : MongoProjection<MyBookings>
         //, or set a CancelledDate,
         //and perhaps move the booking to a new array like MyBookings.BookingsCancelled, or MyBookings.HistoricalBookings
         // or make a separate document like MyBookingsWithHistory. It all depends on our need for the views :)
+        //note: for deleting a document we would use DeleteOne, but we want to keep the document, just remove the booking
         On<V1.BookingCancelled>(
             b => b.UpdateOne
                 .Filter((ctx, doc) =>
@@ -62,10 +64,12 @@ public class MyBookingsProjection : MongoProjection<MyBookings>
     private UpdateDefinition<MyBookings> HandleBookingChanged(IMessageConsumeContext<V1.BookingChanged> ctx,
         UpdateDefinitionBuilder<MyBookings> update)
     {
+
         return update
             .Set(x => x.Bookings[-1].CheckInDate, ctx.Message.CheckInDate)
             .Set(x => x.Bookings[-1].CheckOutDate, ctx.Message.CheckOutDate)
             .Set(x => x.Bookings[-1].Price, ctx.Message.BookingPrice);
+
     }
 
 
@@ -109,5 +113,5 @@ public class MyBookingsProjection : MongoProjection<MyBookings>
         });
 
     }
-    
+
 }

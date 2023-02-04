@@ -1,5 +1,11 @@
 <!--EXTERNAL_PROPERTIES: EventuousVersion-->
 <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <NoWarn>1591</NoWarn>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <NoWarn>1591</NoWarn>
+    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Eventuous.Domain" Version="$(EventuousVersion)" />
         <PackageReference Include="Eventuous.Shared" Version="$(EventuousVersion)" />

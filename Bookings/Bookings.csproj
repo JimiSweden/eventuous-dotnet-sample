@@ -5,13 +5,24 @@
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>1701;1702;1591</NoWarn>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <NoWarn>1701;1702;1591</NoWarn>
+	</PropertyGroup>
     <ItemGroup>
         <!--note: "EventuousVersion" is set in Directory.Build.props -->
 	    <PackageReference Include="Eventuous.Diagnostics.OpenTelemetry" Version="$(EventuousVersion)" />
         <PackageReference Include="Eventuous.EventStore" Version="$(EventuousVersion)" />
+        <PackageReference Include="Eventuous.Gateway" Version="0.13.1" />
         <PackageReference Include="Eventuous.Projections.MongoDB" Version="$(EventuousVersion)" />
         <PackageReference Include="Eventuous.AspNetCore.Web" Version="$(EventuousVersion)" />
         <PackageReference Include="Eventuous.Spyglass" Version="$(EventuousVersion)" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="7.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
         <PackageReference Include="MongoDb.Bson.NodaTime" Version="3.0.0" />
         <PackageReference Include="MongoDB.Driver.Core.Extensions.OpenTelemetry" Version="1.0.0" />
         <PackageReference Include="NodaTime.Serialization.SystemTextJson" Version="1.0.0" />
@@ -24,6 +35,7 @@
         <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="System.Reactive" Version="5.0.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Bookings.Domain\Bookings.Domain.csproj" />

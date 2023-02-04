@@ -56,7 +56,7 @@ public class QueryApi : ControllerBase {
             Debugger.Break();
         }
         var gustBookings = await collection.Find(_ => true).ToListAsync(cancellationToken);
-
+        
         return gustBookings;
 
     }
@@ -102,7 +102,7 @@ public class QueryApi : ControllerBase {
         }
         var gustBookings = await collection.Find(_ => true).ToListAsync(cancellationToken);
 
-        //NOTE: if using mongoDb without the extensino below, we don't need guestIds.
+        //NOTE: if using mongoDb without the extension below, we don't need guestIds.
         // this is a playground, comparing alternatives, it would be better to just return gustBookings here.
 
         var guestIds = await GetGuestIdsForThoseWhoHasEverBooked(cancellationToken);

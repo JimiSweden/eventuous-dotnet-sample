@@ -3,6 +3,7 @@ using Bookings.Application;
 using Bookings.Application.Queries;
 using Bookings.Domain;
 using Bookings.Domain.Bookings;
+using Bookings.Hubs;
 using Bookings.Infrastructure;
 using Bookings.Integration;
 using Eventuous;
@@ -10,6 +11,7 @@ using Eventuous.Diagnostics.OpenTelemetry;
 using Eventuous.EventStore;
 using Eventuous.EventStore.Subscriptions;
 using Eventuous.Projections.MongoDB;
+using Eventuous.Subscriptions.Filters;
 using Eventuous.Subscriptions.Registrations;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
@@ -29,12 +31,13 @@ public static class Registrations {
             )
         );
 
+        services.AddSingleton<UserStateService>();
+        services.AddSingleton<TimerHubService>();
+
+
         // See 'README how to run etc.md' for ESDB notes        
         services.AddEventStoreClient(configuration["EventStore:ConnectionString"]!);
         //Note: if you have login (default) on the Event store database, you need the user and password.
-//TODO.. efter merge, till config. 
-                //services.AddEventStoreClient("esdb://admin:changeit@localhost:2113?tls=true&tlsVerifyCert=false");
-        //services.AddEventStoreClient("esdb://localhost:2113?tls=false");
         services.AddAggregateStore<EsdbEventStore>();
 
 
@@ -48,18 +51,19 @@ public static class Registrations {
        */
         //services.AddSingleton<Services.IsRoomAvailable>((id, period) => new ValueTask<bool>(true)); //a dummy implementation always returning true. 
         services.AddSingleton<Services.IsRoomAvailable>(RoomCheckerService.IsRoomAvailable); //with implementation
-
-
         services.AddSingleton<Services.ConvertCurrency>((from, currency) => new Money(from.Amount * 2, currency));
 
         services.AddSingleton(Mongo.ConfigureMongo(configuration));
 
         services.AddCheckpointStore<MongoCheckpointStore>();
 
+        services.AddSingleton<IBookingsHubService, BookingsHubService>();
+
+
         services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
             "BookingsProjections",
             builder => builder
-//.Configure(cfg => cfg.ConcurrencyLimit = 2)
+                //.Configure(cfg => cfg.ConcurrencyLimit = 2)
                 .UseCheckpointStore<MongoCheckpointStore>()
                 .AddEventHandler<BookingStateProjection>()
                 .AddEventHandler<MyBookingsProjection>()
@@ -67,6 +71,18 @@ public static class Registrations {
                 //TODO: add projection holding the available rooms and booked dates
                 .WithPartitioningByStream(2)
         );
+
+        services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
+            "SubscriptionForSendningSignalRMessages",
+            builder => builder
+                .UseCheckpointStore<MongoCheckpointStore>() //to get latest checkpoint as a first filter to not act on old events.
+                //Ugly filter.. to not get old messages, in case the checkpoint store is reset..
+                //should be handled with a subscription only listening "from now" : TODO: How? (perhaps creating a standard subscription directly from ES client?
+                //not sure how much this newing up datetime would impact performance in a production system.
+                .AddConsumeFilterFirst(new MessageFilter(ctx => ctx.Created.ToUniversalTime() > DateTime.UtcNow.AddSeconds(-15))) //created seems to be utc always, but making sure it is...
+                .AddEventHandler<BookingsSignalRHandler>()
+            );
+        
 
         services.AddSubscription<StreamPersistentSubscription, StreamPersistentSubscriptionOptions>(
             "PaymentIntegration",
@@ -76,6 +92,7 @@ public static class Registrations {
         );
     }
 
+    
     public static void AddOpenTelemetry(this IServiceCollection services) {
         var otelEnabled = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") != null;
 

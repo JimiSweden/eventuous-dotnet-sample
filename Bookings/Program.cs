@@ -11,6 +11,8 @@ using NodaTime.Serialization.SystemTextJson;
 using Serilog;
 using Serilog.Events;
 using System.Reflection;
+using Bookings.Hubs;
+using Microsoft.AspNetCore.Http.Connections;
 
 TypeMap.RegisterKnownEventTypes(typeof(BookingEvents.V1.RoomBooked).Assembly);
 
@@ -58,13 +60,24 @@ builder.Services.AddSwaggerGen(options =>
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
+
+//add SignalR before Eventuous due to DI of IHubContext in HubService inside Eventuous subscribers.
+builder.Services.AddSignalR(hubOptions =>
+{
+    hubOptions.EnableDetailedErrors = true;
+    
+});
+
+
 builder.Services.AddOpenTelemetry();
 builder.Services.AddEventuous(builder.Configuration);
 builder.Services.AddEventuousSpyglass();
 
+
 builder.Services.Configure<JsonOptions>(options
     => options.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
 );
+
 
 /* It's important to note that the UseCors invocation must be placed between UseRouting and UseEndpoints invocations if they are present.*/
 //builder.Services.AddCors(options =>
@@ -75,15 +88,20 @@ builder.Services.Configure<JsonOptions>(options
 //alternative, with policy name and specified origins
 builder.Services.AddCors(options =>
 {
+    /*
+     * A note on Signalr and CORS
+     * "WebSockets and CORS are not compatible " says Brennan on the signalR team : skipNegotiation will skip the HTTP negotiate that does transport fallback and will only run WebSockets. WebSockets and CORS are not compatible so you end up skipping CORS when using that.
+       https://github.com/dotnet/aspnetcore/issues/4457#issuecomment-444738776 -
+     */
     options.AddPolicy("AllowCorsPolicyName",
         builder =>
         {
             builder
                 .WithOrigins(
+                    //assuming frontend runs on port 4200
                     "http://localhost:4200"
-                    //,
-                    //"http://localhost:5174",
                     //"https://*.example.com"
+                    //, "*"
 
                 )
                 .SetIsOriginAllowedToAllowWildcardSubdomains()
@@ -97,16 +115,23 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseSerilogRequestLogging();
+//app.UseSerilogRequestLogging();
 app.AddEventuousLogs();
 app.UseSwagger().UseSwaggerUI();
 app.MapControllers();
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.MapEventuousSpyglass(null);
 
-
-// With endpoint routing, the CORS middleware must be configured to execute between the calls to UseRouting and UseEndpoints.
+// With endpoint routing, the CORS middleware must be configured to execute between the calls to UseRouting and UseEndpoints(i.e. app.MapHub)
 app.UseCors("AllowCorsPolicyName");
+
+//this hub is used in Angular app found at https://github.com/JimiSweden/AngularExamplesAndSnippets
+// in "app/bookings" (bracnh, if not merged to master, bookings-with-eventstore-backend)
+app.MapHub<BookingsHub>("/hubs/bookingsHub", options =>
+{
+    options.Transports = HttpTransportType.WebSockets; //only allow websockets
+});
+
 
 var factory  = app.Services.GetRequiredService<ILoggerFactory>();
 var listener = new LoggingEventListener(factory, "OpenTelemetry");
@@ -115,6 +140,7 @@ try {
     app.Run();
     //app.Run("http://*:5003");
     //app.Run("http://*:5051");
+    
     return 0;
 }
 catch (Exception e) {
