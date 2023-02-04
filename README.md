@@ -1,3 +1,7 @@
+## note
+there is a frontend aplication (wip) in angular to be found here https://github.com/JimiSweden/AngularExamplesAndSnippets/tree/bookings-with-eventstore-backend
+not sure if it will ever be merged to its main branch, perhaps it will be added in this repo but not for now 😊
+
 ## EvenStore.
 see 'README EventStore how to install run and getting started.md'
 
